@@ -1,6 +1,7 @@
 {
   "name": "dev-tools",
   "version": "0.0.0",
+  "homepage": "https://wangchristine.github.io/dev-tools",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
