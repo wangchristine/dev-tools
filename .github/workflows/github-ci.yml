@@ -35,7 +35,6 @@ jobs:
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
-          # testing github action
           # 這裡的 GITHUB_TOKEN 不用另外設定
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
