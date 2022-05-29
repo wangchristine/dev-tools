@@ -9,6 +9,7 @@ export default {
     const open = ref(true);
 
     return {
+      // eslint-disable-next-line vue/no-dupe-keys
       json: props.json,
       open: open,
     };
