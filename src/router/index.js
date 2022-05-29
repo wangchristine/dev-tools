@@ -11,7 +11,7 @@ const router = createRouter({
       component: HomeView,
     },
     {
-      path: "/json",
+      path: "/json-parser",
       name: "json",
       component: JsonView,
     },
