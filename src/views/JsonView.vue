@@ -2,21 +2,23 @@
 import { reactive } from "vue";
 import JsonTree from "@/components/JsonTree.vue";
 
-// const jsonObj = reactive({"null":null,"boolean":[true,false],"number":[0,2.1,2e8,-123456780123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780],"string":{"any characters":"abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def","quotation \"":"\\","backslash \\\\":"\\\\","slash \\/":"\\/","backspace \\b":"\\b","form feed \\f":"\\f","new line \\n":"\\n","carriage return \\r":"\\r","tab \\t":"\\t","hexadeci\\u006Dal":"\\u004A-\\u005A"}});
+const jsonObj = reactive({"null":null,"boolean":[true,false],"number":[0,2.1,2e8,-123456780123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780],"string":{"any characters":"abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def","quotation \"":"\\","backslash \\\\":"\\\\","slash \\/":"\\/","backspace \\b":"\\b","form feed \\f":"\\f","new line \\n":"\\n","carriage return \\r":"\\r","tab \\t":"\\t","hexadeci\\u006Dal":"\\u004A-\\u005A"}});
 // const jsonObj = reactive(["a", "b", { "c": 1 }]);
-// const jsonObj = reactive({"a": 1, "b": [2,3]});
+// const jsonObj = reactive({"a": 1, "b": [2,3,4]});
+// const jsonObj = reactive([2,3,4]);
 // const jsonObj = reactive({"a": 1, "b": [2,{"c": ["d"]}]});
-const jsonObj = reactive([{ a: 1, b: [2, { c: ["d"] }] }]);
+// const jsonObj = reactive([{"a": 1, "b": [2,{"c": ["d"]}]}]);
+// const jsonObj = reactive([{"a": 1, "b": [2,{"c": [{"a": 1, "b": [2,{"c": ["d"]}]}]}]}]);
 </script>
 
 <template>
-  <div className="user-block">
-    <p className="block-title">Input</p>
-    <div className="user-json">{{ jsonObj }}</div>
+  <div class="user-block">
+    <p class="block-title">Input</p>
+    <div class="user-json">{{ jsonObj }}</div>
   </div>
-  <div className="result-block">
-    <p className="block-title">Result</p>
-    <div className="result-json">
+  <div class="result-block">
+    <p class="block-title">Result</p>
+    <div class="result-json">
       <JsonTree :json="jsonObj" />
     </div>
   </div>
