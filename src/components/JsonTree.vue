@@ -4,6 +4,7 @@ export default {
   name: "JsonTree",
   props: {
     json: [Array, Object, String, Number, Boolean],
+    keyTest: String,
   },
   setup(props) {
     const open = ref(true);
@@ -12,12 +13,17 @@ export default {
       // eslint-disable-next-line vue/no-dupe-keys
       json: props.json,
       open: open,
+      // eslint-disable-next-line vue/no-dupe-keys
+      keyTest: props.keyTest,
     };
   },
 };
 </script>
 
 <template>
+  <span v-if="keyTest" class="object-key" @click.stop="open = !open"
+    >"{{ keyTest }}":
+  </span>
   <template v-if="json !== null && typeof json == 'object'">
     <template v-if="json.constructor.name === 'Array'">
       <span
@@ -41,8 +47,7 @@ export default {
       >
       <ul v-show="open">
         <li v-for="(child, key) in json" :key="key">
-          <span class="object-key">"{{ key }}": </span>
-          <JsonTree :json="child" />
+          <JsonTree :keyTest="key" :json="child" />
           <span v-if="key !== Object.keys(json)[Object.keys(json).length - 1]"
             >,
           </span>
