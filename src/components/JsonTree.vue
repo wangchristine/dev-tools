@@ -17,27 +17,26 @@ export default {
         count.value = Object.keys(props.json).length.toString();
       }
     }
-    console.log(count.value);
+
     return {
-      // eslint-disable-next-line vue/no-dupe-keys
-      json: props.json,
+      props,
       open: open,
-      // eslint-disable-next-line vue/no-dupe-keys
-      objectKey: props.objectKey,
       count: JSON.stringify(
-        count.value + (count.value === "1" ? " item" : " items")
+        count.value +
+          (count.value === "1" || count.value === "0" ? " item" : " items")
       ),
+      // count: JSON.stringify(count.value + " items")
     };
   },
 };
 </script>
 
 <template>
-  <span v-if="objectKey" class="object-key" @click.stop="open = !open"
-    >"{{ objectKey }}":
+  <span v-if="props.objectKey" class="object-key" @click.stop="open = !open"
+    >"{{ props.objectKey }}":
   </span>
-  <template v-if="json !== null && typeof json == 'object'">
-    <template v-if="json.constructor.name === 'Array'">
+  <template v-if="props.json !== null && typeof props.json == 'object'">
+    <template v-if="props.json.constructor.name === 'Array'">
       <span
         :class="['array-bracket', { close: !open }]"
         @click.stop="open = !open"
@@ -45,9 +44,9 @@ export default {
       >
       <span class="count"></span>
       <ul v-show="open">
-        <li v-for="(child, key) in json" :key="key">
+        <li v-for="(child, key) in props.json" :key="key">
           <JsonTree :json="child" />
-          <span v-if="json.length !== key + 1">, </span>
+          <span v-if="props.json.length !== key + 1">, </span>
         </li>
       </ul>
       <span>]</span>
@@ -60,9 +59,13 @@ export default {
       >
       <span class="count"></span>
       <ul v-show="open">
-        <li v-for="(child, key) in json" :key="key">
+        <li v-for="(child, key) in props.json" :key="key">
           <JsonTree :objectKey="key" :json="child" />
-          <span v-if="key !== Object.keys(json)[Object.keys(json).length - 1]"
+          <span
+            v-if="
+              key !==
+              Object.keys(props.json)[Object.keys(props.json).length - 1]
+            "
             >,
           </span>
         </li>
@@ -71,11 +74,11 @@ export default {
     </template>
   </template>
   <template v-else>
-    <span v-if="typeof json === 'string'" :class="typeof json"
-      >"{{ json }}"</span
+    <span v-if="typeof props.json === 'string'" :class="typeof props.json"
+      >"{{ props.json }}"</span
     >
-    <span v-else-if="typeof json === 'object'" class="null">null</span>
-    <span v-else :class="typeof json">{{ json }}</span>
+    <span v-else-if="typeof props.json === 'object'" class="null">null</span>
+    <span v-else :class="typeof props.json">{{ props.json }}</span>
   </template>
 </template>
 
