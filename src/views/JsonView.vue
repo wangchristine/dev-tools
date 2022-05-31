@@ -7,7 +7,7 @@ import JsonTree from "@/components/JsonTree.vue";
 // const jsonObj = reactive({"a": 1, "b": [2,3,4]});
 // const jsonObj = reactive([2,3,4]);
 // const jsonObj = reactive({"a": 1, "b": [2,{"c": ["d"]}]});
-  // const jsonObj = reactive([{"a": 1, "b": [2,{"c": ["d"]}]}]);
+// const jsonObj = reactive([{"a": 1, "b": [2,{"c": ["d"]}]}]);
 // const jsonObj = reactive([{"a": 1, "b": [2,{"c": [{"a": 1, "b": [2,{"c": ["d"]}]}]}]}]);
 // let jsonObj = reactive();
 
@@ -15,21 +15,18 @@ import JsonTree from "@/components/JsonTree.vue";
 const jsonString = ref("");
 // const jsonString = reactive("[]");
 const jsonObj = ref();
-let isError = ref(false);
 let errorMessage = ref("");
 
 watch(jsonString, (userInput) => {
   try {
-    if (userInput.trim() === "") {
+    if (userInput === "") {
       jsonObj.value = undefined;
     } else {
       jsonObj.value = JSON.parse(userInput);
     }
-    isError.value = false;
     errorMessage.value = "";
   } catch (e) {
     jsonObj.value = undefined;
-    isError.value = true;
     errorMessage.value = e.message;
   }
 });
@@ -43,13 +40,13 @@ watch(jsonString, (userInput) => {
     <textarea
       name="userInput"
       class="user-json"
-      v-model="jsonString"
+      v-model.trim="jsonString"
     ></textarea>
   </div>
   <div class="result-block">
     <p class="block-title">Result</p>
     <div class="result-json">
-      <JsonTree v-if="!isError" :json="jsonObj" />
+      <JsonTree v-if="jsonObj !== undefined" :json="jsonObj" />
       <p class="error-message" v-else>{{ errorMessage }}</p>
     </div>
   </div>
