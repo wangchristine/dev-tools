@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, onUnmounted } from "vue";
 import JsonTree from "@/components/JsonTree.vue";
 
 // const jsonObj = reactive({"null":null,"boolean":[true,false],"number":[0,2.1,2e8,-123456780123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780],"string":{"any characters":"abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def","quotation \"":"\\","backslash \\\\":"\\\\","slash \\/":"\\/","backspace \\b":"\\b","form feed \\f":"\\f","new line \\n":"\\n","carriage return \\r":"\\r","tab \\t":"\\t","hexadeci\\u006Dal":"\\u004A-\\u005A"}});
@@ -16,6 +16,7 @@ const jsonString = ref("");
 // const jsonString = reactive("[]");
 const jsonObj = ref();
 let errorMessage = ref("");
+let copyText = ref("Copy");
 
 watch(jsonString, (userInput) => {
   try {
@@ -30,6 +31,37 @@ watch(jsonString, (userInput) => {
     errorMessage.value = e.message;
   }
 });
+
+let timer = null;
+const copyToClipboard = () => {
+  clearTimeout(timer);
+  let jsonFormat = ref("");
+
+  if (jsonObj.value !== undefined) {
+    jsonFormat.value = JSON.stringify(jsonObj.value, null, 2);
+  } else {
+    if (errorMessage.value !== "") {
+      jsonFormat.value = errorMessage.value;
+    }
+  }
+
+  navigator.clipboard
+    .writeText(jsonFormat.value)
+    .then(() => {
+      copyText.value = "Copied!";
+      console.log("Copied to clipboard.");
+      timer = setTimeout(() => {
+        copyText.value = "Copy";
+      }, 1000);
+    })
+    .catch((err) => {
+      console.log("Can't copy!", err);
+    });
+};
+
+onUnmounted(() => {
+  clearTimeout(timer);
+});
 </script>
 
 <template>
@@ -38,16 +70,19 @@ watch(jsonString, (userInput) => {
     <!-- <div class="user-json">{{ jsonObj }}</div> -->
 
     <textarea
+      v-focus
       name="userInput"
       class="user-json"
+      placeholder="Type here to convert to json tree..."
       v-model.trim="jsonString"
     ></textarea>
   </div>
   <div class="result-block">
     <p class="block-title">Result</p>
-    <div class="result-json">
+    <div class="result-json" id="result-json">
       <JsonTree v-if="jsonObj !== undefined" :json="jsonObj" />
-      <p class="error-message" v-else>{{ errorMessage }}</p>
+      <p v-else class="error-message">{{ errorMessage }}</p>
+      <button class="copy" @click="copyToClipboard()">{{ copyText }} 📄</button>
     </div>
   </div>
 </template>
@@ -89,5 +124,17 @@ watch(jsonString, (userInput) => {
 .error-message {
   color: #d02451;
   font-weight: bold;
+}
+
+.copy {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #bb8e8e;
+  color: white;
+  border: 0;
+  padding: 8px 12px;
+  font-size: 16px;
+  cursor: pointer;
 }
 </style>
