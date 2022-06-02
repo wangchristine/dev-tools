@@ -1,5 +1,5 @@
 <script>
-import { ref } from "vue";
+import { ref, watch, toRef } from "vue";
 export default {
   name: "JsonTree",
   props: {
@@ -9,23 +9,34 @@ export default {
   setup(props) {
     const open = ref(true);
 
-    let count = ref("null");
-    if (props.json !== null && typeof props.json == "object") {
-      if (props.json.constructor.name === "Array") {
-        count.value = props.json.length.toString();
-      } else {
-        count.value = Object.keys(props.json).length.toString();
+    let count = ref(0);
+
+    const calcCount = (data) => {
+      if (data !== null && typeof data == "object") {
+        if (data.constructor.name === "Array") {
+          count.value = data.length;
+        } else {
+          count.value = Object.keys(data).length;
+        }
       }
-    }
+    };
+
+    calcCount(props.json);
+
+    watch(
+      toRef(props, "json"), // or: () => props.json
+      (newJson) => {
+        console.log("watching~");
+        console.log(newJson);
+        calcCount(newJson);
+      }
+      // {deep: true}
+    );
 
     return {
       props,
       open: open,
-      count: JSON.stringify(
-        count.value +
-          (count.value === "1" || count.value === "0" ? " item" : " items")
-      ),
-      // count: JSON.stringify(count.value + " items")
+      count: count,
     };
   },
 };
@@ -128,7 +139,7 @@ ul {
 }
 
 .count::after {
-  content: v-bind(count);
+  content: v-bind(` "${count} item${count > 1 ? 's':''}" `);
   background-color: #c3b5f4;
   color: #fefefe;
   border-radius: 4px;
