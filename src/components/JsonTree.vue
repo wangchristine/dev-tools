@@ -1,5 +1,5 @@
 <script>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 export default {
   name: "JsonTree",
   props: {
@@ -9,23 +9,25 @@ export default {
   setup(props) {
     const open = ref(true);
 
-    let count = ref("null");
-    if (props.json !== null && typeof props.json == "object") {
-      if (props.json.constructor.name === "Array") {
-        count.value = props.json.length.toString();
-      } else {
-        count.value = Object.keys(props.json).length.toString();
+    const count = computed(() => {
+      if (props.json !== null && typeof props.json == "object") {
+        if (props.json.constructor.name === "Array") {
+          return props.json.length;
+        } else {
+          return Object.keys(props.json).length;
+        }
       }
-    }
+      return null;
+    });
+    const content = computed(() => {
+      return `"${count.value} item${count.value > 1 ? "s" : ""}"`;
+    });
 
     return {
       props,
       open: open,
-      count: JSON.stringify(
-        count.value +
-          (count.value === "1" || count.value === "0" ? " item" : " items")
-      ),
-      // count: JSON.stringify(count.value + " items")
+      count,
+      content,
     };
   },
 };
@@ -128,7 +130,7 @@ ul {
 }
 
 .count::after {
-  content: v-bind(count);
+  content: v-bind(content);
   background-color: #c3b5f4;
   color: #fefefe;
   border-radius: 4px;
