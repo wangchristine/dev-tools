@@ -1,70 +1,53 @@
 <script setup>
-// import { RouterLink, RouterView } from "vue-router";
-// import HelloWorld from "@/components/HelloWorld.vue";
+import { RouterLink, RouterView } from "vue-router";
 </script>
 
 <template>
   <header>
-    <!--    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />-->
-
-<!--    <div class="wrapper">-->
-      <!--      <HelloWorld msg="You did it!" />-->
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/json-parser">Json Parser</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-<!--    </div>-->
+    <RouterLink class="brand-title" :to="{ name: 'home' }"
+      >Dev Tools</RouterLink
+    >
+    <!-- <span class="brand-title">Dev Tools</span> -->
+    <nav class="tool-link">
+      <RouterLink :to="{ name: 'home' }">Home</RouterLink>
+      <RouterLink :to="{ name: 'json' }">Json Parser</RouterLink>
+    </nav>
   </header>
 
   <main>
     <RouterView />
   </main>
-
 </template>
 
 <style>
 @import "@/assets/base.css";
-
-main {
-  display: flex;
-  width: 100%;
-  /*max-width: 1280px;*/
-  margin: 0 auto;
-  padding: 2rem;
-  font-size: 18px;
-  font-weight: normal;
+body {
+  background-color: #f7f7f7;
 }
 
 header {
   line-height: 1.5;
-  max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-}
-
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
-
-nav {
+  font-size: 16px;
   width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
+  height: 60px;
+  padding: 15px;
+  /* max-height: 100vh; */
+  background-color: #ffffff;
+  box-shadow: 0px 2px 10px 2px rgb(0 0 0 / 30%);
+}
+
+.brand-title {
+  margin: 0 20px;
+  color: #60b699;
+  font-weight: bold;
+  font-size: 18px;
+  text-decoration: none;
+}
+
+nav.tool-link {
+  display: inline-block;
+  /* text-align: center; */
+  /* margin-top: 2rem; */
 }
 
 nav a.router-link-exact-active {
@@ -85,41 +68,36 @@ nav a:first-of-type {
   border: 0;
 }
 
-/*@media (min-width: 1024px) {*/
-/*  body {*/
-/*    display: flex;*/
-/*    place-items: center;*/
-/*  }*/
+nav a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+}
 
-/*  #app {*/
-/*    display: grid;*/
-/*    grid-template-columns: 1fr 1fr;*/
-/*    padding: 0 2rem;*/
-/*  }*/
+@media (hover: hover) {
+  nav a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
 
-/*  header {*/
-/*    display: flex;*/
-/*    place-items: center;*/
-/*    padding-right: calc(var(--section-gap) / 2);*/
-/*  }*/
+main {
+  display: flex;
+  justify-content: space-around;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-size: 16px;
+  height: calc(100vh - 60px);
+}
 
-/*  header .wrapper {*/
-/*    display: flex;*/
-/*    place-items: flex-start;*/
-/*    flex-wrap: wrap;*/
-/*  }*/
-
-/*  .logo {*/
-/*    margin: 0 2rem 0 0;*/
-/*  }*/
-
-/*  nav {*/
-/*    text-align: left;*/
-/*    margin-left: -1rem;*/
-/*    font-size: 1rem;*/
-
-/*    padding: 1rem 0;*/
-/*    margin-top: 1rem;*/
-/*  }*/
-/*}*/
+@media (min-width: 1024px) {
+  /*  nav {*/
+  /*    text-align: left;*/
+  /*    margin-left: -1rem;*/
+  /*    font-size: 1rem;*/
+  /*    padding: 1rem 0;*/
+  /*    margin-top: 1rem;*/
+  /*  }*/
+}
 </style>

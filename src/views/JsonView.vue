@@ -90,10 +90,12 @@ onUnmounted(() => {
 <style scoped>
 .user-block {
   width: 45%;
+  margin-right: 5px;
 }
 
 .result-block {
   width: 55%;
+  margin-left: 5px;
 }
 
 .block-title {
@@ -105,20 +107,20 @@ onUnmounted(() => {
 .user-json {
   padding: 10px;
   border: black 1px solid;
-  margin-right: 5px;
-  height: calc(100vh - 80px);
   width: 100%;
+  height: calc(100% - 60px);
   overflow: scroll;
   resize: none;
+  font-size: 16px;
 }
 
 .result-json {
   color: #456aa1;
   padding: 10px 10px 10px 20px;
   border: black 1px solid;
-  margin-left: 5px;
-  height: calc(100vh - 80px);
+  height: calc(100% - 60px);
   overflow: scroll;
+  background-color: #ffffff;
 }
 
 .error-message {
@@ -134,7 +136,7 @@ onUnmounted(() => {
   color: white;
   border: 0;
   padding: 8px 12px;
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
 }
 </style>
