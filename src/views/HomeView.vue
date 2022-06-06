@@ -1,9 +1,71 @@
 <script setup>
-import TheWelcome from "@/components/TheWelcome.vue";
 </script>
 
 <template>
-  <main>
-    <TheWelcome />
-  </main>
+  <div class="container">
+    <div class="introduce">
+      <div class="title">Introduce</div>
+      <div class="content">
+        The inspiration of Dev Tools comes from my usual and work coding
+        experience. This website contains tools commonly used in development,
+        and continually updating.
+      </div>
+    </div>
+    <div class="about">
+      <img src="@/assets/avatar.png" class="avatar" alt="My Avatar" />
+      <div class="author">Chris Wang</div>
+      <div class="experience">
+        <div class="title">Backend Engineer</div>
+        <div class="description">who wants to be a Full Stack Engineer :D</div>
+      </div>
+    </div>
+  </div>
 </template>
+
+<style scoped>
+.container {
+  text-align: center;
+  width: 80%;
+}
+
+.introduce {
+  padding: 20px;
+  border: 2px #42b883 dashed;
+}
+
+.introduce .title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #42b883;
+}
+
+.introduce .content {
+  margin-top: 10px;
+}
+
+.about {
+  margin-top: 60px;
+  padding-bottom: 30px;
+}
+
+.about .avatar {
+  border-radius: 50%;
+  width: 200px;
+  height: 200px;
+}
+
+.about .author {
+  font-size: 20px;
+  margin: 10px;
+}
+
+.about .experience {
+  margin-top: 10px;
+}
+
+.experience .description {
+  color: #7e7e7e;
+  font-style: italic;
+  font-size: 14px;
+}
+</style>
