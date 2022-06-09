@@ -9,4 +9,8 @@ Common development tools for all Front-end, Back-end, and Full Stack developer!
 1. Json Parser
 
 ## Special thanks :D
-Tommy and Helio
+
+(Alphabetical order)
+
+Alice, Helio, Kris, Tommy 
+
