@@ -2,18 +2,16 @@
 import { ref, watch, onUnmounted, onMounted } from "vue";
 import JsonTree from "@/components/JsonTree.vue";
 
-// const jsonObj = reactive({"null":null,"boolean":[true,false],"number":[0,2.1,2e8,-123456780123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780],"string":{"any characters":"abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def","quotation \"":"\\","backslash \\\\":"\\\\","slash \\/":"\\/","backspace \\b":"\\b","form feed \\f":"\\f","new line \\n":"\\n","carriage return \\r":"\\r","tab \\t":"\\t","hexadeci\\u006Dal":"\\u004A-\\u005A"}});
-// const jsonObj = reactive(["a", "b", { "c": 1 }]);
-// const jsonObj = reactive({"a": 1, "b": [2,3,4]});
-// const jsonObj = reactive([2,3,4]);
-// const jsonObj = reactive({"a": 1, "b": [2,{"c": ["d"]}]});
-// const jsonObj = reactive([{"a": 1, "b": [2,{"c": ["d"]}]}]);
-// const jsonObj = reactive([{"a": 1, "b": [2,{"c": [{"a": 1, "b": [2,{"c": ["d"]}]}]}]}]);
-// let jsonObj = reactive();
+// example json
+// {"null":null,"boolean":[true,false],"number":[0,2.1,2e8,-123456780123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780],"string":{"any characters":"abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def","quotation \"":"\\","backslash \\\\":"\\\\","slash \\/":"\\/","backspace \\b":"\\b","form feed \\f":"\\f","new line \\n":"\\n","carriage return \\r":"\\r","tab \\t":"\\t","hexadeci\\u006Dal":"\\u004A-\\u005A"}}
+// ["a", "b", { "c": 1 }]
+// {"a": 1, "b": [2,3,4]}
+// [2,3,4]
+// {"a": 1, "b": [2,{"c": ["d"]}]}
+// [{"a": 1, "b": [2,{"c": ["d"]}]}]
+// [{"a": 1, "b": [2,{"c": [{"a": 1, "b": [2,{"c": ["d"]}]}]}]}]
 
-// const jsonString = ref("[{\"a\": 1, \"b\": [2,{\"c\": [{\"a\": 1, \"b\": [2,{\"c\": [\"d\"]}]}]}]}]");
 const jsonString = ref("");
-// const jsonString = reactive("[]");
 const jsonObj = ref();
 let errorMessage = ref("");
 let copyText = ref("Copy");
@@ -33,6 +31,9 @@ watch(jsonString, (userInput) => {
 });
 
 let timer = null;
+// DOM
+const copy = ref(null);
+
 const copyToClipboard = () => {
   clearTimeout(timer);
   let jsonFormat = ref("");
@@ -49,9 +50,11 @@ const copyToClipboard = () => {
     .writeText(jsonFormat.value)
     .then(() => {
       copyText.value = "Copied!";
+      copy.value.style.backgroundColor = "#ed6b6b";
       console.log("Copied to clipboard.");
       timer = setTimeout(() => {
         copyText.value = "Copy";
+        copy.value.style.backgroundColor = "#bb8e8e";
       }, 1000);
     })
     .catch((err) => {
@@ -123,7 +126,9 @@ const handleMouseup = () => {
         <JsonTree v-if="jsonObj !== undefined" :json="jsonObj" />
         <p v-else class="error-message">{{ errorMessage }}</p>
       </div>
-      <button class="copy" @click="copyToClipboard()">{{ copyText }} 📄</button>
+      <button class="copy" ref="copy" @click="copyToClipboard()">
+        {{ copyText }} 📄
+      </button>
     </div>
   </div>
 </template>
@@ -131,15 +136,11 @@ const handleMouseup = () => {
 <style scoped>
 .user-block {
   width: 45%;
-  /*width: calc(45% - 10px);*/
-  /* margin-right: 5px; */
   min-width: 150px;
 }
 
 .result-block {
-  /*width: 55%;*/
   width: calc(55% - 2px);
-  /* margin-left: 5px; */
   min-width: 150px;
 }
 
@@ -197,7 +198,7 @@ const handleMouseup = () => {
 .copy {
   position: absolute;
   top: 0;
-  right: 18px;
+  right: 16px;
   background-color: #bb8e8e;
   color: white;
   border: 0;
