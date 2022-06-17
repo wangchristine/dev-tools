@@ -115,7 +115,7 @@ ul {
 
 .array-bracket ~ ul,
 .object-bracket ~ ul {
-  border-left: #e8e8e8 1.5px solid;
+  border-left: var(--color-block-ul-border) 1.5px solid;
 }
 
 .array-bracket:hover ~ ul,
@@ -132,7 +132,7 @@ ul {
 .count::after {
   content: v-bind(content);
   background-color: #c3b5f4;
-  color: #fefefe;
+  color: var(--color-block-text2);
   border-radius: 4px;
   padding: 0 4px;
   margin: auto 5px;
