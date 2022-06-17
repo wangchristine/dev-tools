@@ -1,5 +1,35 @@
 <script setup>
+import { ref, onMounted } from "vue";
 import { RouterLink, RouterView } from "vue-router";
+
+let themeIcon = ref("");
+onMounted(() => {
+  if (localStorage.getItem("theme") === "dark") {
+    setTheme("dark");
+  } else {
+    setTheme("light");
+  }
+});
+
+const switchTheme = () => {
+  if (localStorage.getItem("theme") === "dark") {
+    setTheme("light");
+  } else {
+    setTheme("dark");
+  }
+};
+
+const setTheme = (theme) => {
+  if (theme == "dark") {
+    document.documentElement.className = "dark";
+    localStorage.setItem("theme", "dark");
+    themeIcon.value = "🌙";
+  } else {
+    document.documentElement.className = "";
+    localStorage.setItem("theme", "light");
+    themeIcon.value = "🌞";
+  }
+};
 </script>
 
 <template>
@@ -12,6 +42,11 @@ import { RouterLink, RouterView } from "vue-router";
       <RouterLink :to="{ name: 'home' }">Home</RouterLink>
       <RouterLink :to="{ name: 'json' }">Json Parser</RouterLink>
     </nav>
+    <span class="header-right">
+      <button name="theme" class="theme" @click="switchTheme">
+        {{ themeIcon }}
+      </button>
+    </span>
   </header>
 
   <main>
@@ -21,9 +56,6 @@ import { RouterLink, RouterView } from "vue-router";
 
 <style>
 @import "@/assets/base.css";
-body {
-  background-color: #f7f7f7;
-}
 
 header {
   line-height: 1.5;
@@ -32,7 +64,8 @@ header {
   height: 60px;
   padding: 15px;
   /* max-height: 100vh; */
-  background-color: #ffffff;
+  background-color: var(--color-header-background);
+  border-bottom: solid 1px var(--color-header-bottom);
   box-shadow: 0px 2px 10px 2px rgb(0 0 0 / 30%);
 }
 
@@ -61,7 +94,7 @@ nav a.router-link-exact-active:hover {
 nav a {
   display: inline-block;
   padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
+  border-left: 1px solid var(--color-header-divider);
 }
 
 nav a:first-of-type {
@@ -79,6 +112,17 @@ nav a,
   nav a:hover {
     background-color: hsla(160, 100%, 37%, 0.2);
   }
+}
+
+header .header-right {
+  float: right;
+}
+
+.theme {
+  height: 28px;
+  width: 28px;
+  border-radius: 50%;
+  padding: 0;
 }
 
 main {

@@ -173,13 +173,15 @@ const handleMouseup = () => {
   overflow-y: scroll;
   resize: none;
   font-size: 16px;
+  background-color: var(--color-block-background);
+  color: var(--color-block-text1);
 }
 
 .result-json {
-  color: #456aa1;
+  color: var(--color-block-text3);
   border: black 1px solid;
   height: calc(100% - 60px);
-  background-color: #ffffff;
+  background-color: var(--color-block-background);
 }
 
 .tree-json {
