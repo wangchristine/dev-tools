@@ -24,8 +24,12 @@
 
 <style scoped>
 .container {
+  display: flex;
+  justify-content: space-around;
   text-align: center;
   width: 80%;
+  margin: auto;
+  flex-wrap: wrap;
 }
 
 .introduce {
@@ -35,7 +39,6 @@
 
 .introduce .title {
   font-size: 20px;
-  font-weight: bold;
   color: #42b883;
 }
 
@@ -49,9 +52,8 @@
 }
 
 .about .avatar {
-  border-radius: 50%;
-  width: 200px;
-  height: 200px;
+  width: 50px;
+  height: 50px;
 }
 
 .about .author {
