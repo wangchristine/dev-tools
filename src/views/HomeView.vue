@@ -39,6 +39,7 @@
 
 .introduce .title {
   font-size: 20px;
+  font-weight: bold;
   color: #42b883;
 }
 
@@ -52,8 +53,9 @@
 }
 
 .about .avatar {
-  width: 50px;
-  height: 50px;
+  border-radius: 50%;
+  width: 200px;
+  height: 200px;
 }
 
 .about .author {
