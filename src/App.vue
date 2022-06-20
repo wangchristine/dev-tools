@@ -41,6 +41,7 @@ const setTheme = (theme) => {
     <nav class="tool-link">
       <RouterLink :to="{ name: 'home' }">Home</RouterLink>
       <RouterLink :to="{ name: 'json' }">Json Parser</RouterLink>
+      <RouterLink :to="{ name: 'encode-decode' }">Encode & Decode</RouterLink>
     </nav>
     <span class="header-right">
       <button name="theme" class="theme" @click="switchTheme">
@@ -126,8 +127,6 @@ header .header-right {
 }
 
 main {
-  display: flex;
-  justify-content: space-around;
   max-width: 1440px;
   margin: 0 auto;
   padding: 2rem;

@@ -107,33 +107,45 @@ const handleMouseup = () => {
 </script>
 
 <template>
-  <div class="user-block" id="user-block" ref="userBlock">
-    <p class="block-title">Input</p>
-    <textarea
-      v-focus
-      name="userInput"
-      class="user-json"
-      placeholder="Type here to convert to json tree..."
-      v-model.trim="jsonString"
-    ></textarea>
-  </div>
-  <div class="result-block" id="result-block" ref="resultBlock">
-    <div class="drag-block" id="drag-block" @mousedown="handleMouseDown"></div>
+  <div class="container">
+    <div class="user-block" id="user-block" ref="userBlock">
+      <p class="block-title">Input</p>
+      <textarea
+        v-focus
+        name="userInput"
+        class="user-json"
+        placeholder="Type here to convert to json tree..."
+        v-model.trim="jsonString"
+      ></textarea>
+    </div>
+    <div class="result-block" id="result-block" ref="resultBlock">
+      <div
+        class="drag-block"
+        id="drag-block"
+        @mousedown="handleMouseDown"
+      ></div>
 
-    <p class="block-title">Result</p>
-    <div class="result-json" id="result-json">
-      <div class="tree-json">
-        <JsonTree v-if="jsonObj !== undefined" :json="jsonObj" />
-        <p v-else class="error-message">{{ errorMessage }}</p>
+      <p class="block-title">Result</p>
+      <div class="result-json" id="result-json">
+        <div class="tree-json">
+          <JsonTree v-if="jsonObj !== undefined" :json="jsonObj" />
+          <p v-else class="error-message">{{ errorMessage }}</p>
+        </div>
+        <button class="copy" ref="copy" @click="copyToClipboard()">
+          {{ copyText }} 📄
+        </button>
       </div>
-      <button class="copy" ref="copy" @click="copyToClipboard()">
-        {{ copyText }} 📄
-      </button>
     </div>
   </div>
 </template>
 
 <style scoped>
+.container {
+  display: flex;
+  justify-content: space-around;
+  height: 100%;
+}
+
 .user-block {
   width: 45%;
   min-width: 150px;
