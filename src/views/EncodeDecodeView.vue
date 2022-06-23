@@ -277,6 +277,6 @@ onUnmounted(() => {
   padding: 8px 12px;
   font-size: 14px;
   cursor: pointer;
-  z-index: 999;
+  z-index: 2;
 }
 </style>
