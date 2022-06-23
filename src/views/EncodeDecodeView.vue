@@ -270,7 +270,7 @@ onUnmounted(() => {
 .copy {
   position: absolute;
   top: 0;
-  right: 16px;
+  right: 0;
   background-color: #bb8e8e;
   color: white;
   border: 0;
@@ -278,5 +278,10 @@ onUnmounted(() => {
   font-size: 14px;
   cursor: pointer;
   z-index: 2;
+  opacity: 0.5;
+}
+
+.string-block:hover > .copy {
+  opacity: 1;
 }
 </style>
