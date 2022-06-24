@@ -30,6 +30,15 @@ const setTheme = (theme) => {
     themeIcon.value = "🌞";
   }
 };
+
+const toolLink = ref(null);
+const toggleBurger = () => {
+  if (toolLink.value.style.display === "") {
+    toolLink.value.style.display = "inline-block";
+  } else {
+    toolLink.value.style.display = "";
+  }
+};
 </script>
 
 <template>
@@ -37,12 +46,12 @@ const setTheme = (theme) => {
     <RouterLink class="brand-title" :to="{ name: 'home' }"
       >Dev Tools</RouterLink
     >
-    <!-- <span class="brand-title">Dev Tools</span> -->
-    <nav class="tool-link">
+    <nav class="tool-link" ref="toolLink">
       <RouterLink :to="{ name: 'home' }">Home</RouterLink>
       <RouterLink :to="{ name: 'json' }">Json Parser</RouterLink>
       <RouterLink :to="{ name: 'encode-decode' }">Encode & Decode</RouterLink>
     </nav>
+    <button class="burger" @click="toggleBurger">≡</button>
     <span class="header-right">
       <button name="theme" class="theme" @click="switchTheme">
         {{ themeIcon }}
@@ -81,7 +90,6 @@ header {
 nav.tool-link {
   display: inline-block;
   /* text-align: center; */
-  /* margin-top: 2rem; */
 }
 
 nav a.router-link-exact-active {
@@ -109,6 +117,16 @@ nav a,
   transition: 0.4s;
 }
 
+header .burger {
+  display: none;
+  font-weight: bold;
+  font-size: 18px;
+  border: 0;
+  background-color: transparent;
+  color: var(--color-block-text1);
+  transform: scale(1.5, 1);
+}
+
 @media (hover: hover) {
   nav a:hover {
     background-color: hsla(160, 100%, 37%, 0.2);
@@ -134,13 +152,21 @@ main {
   height: calc(100vh - 60px);
 }
 
-@media (min-width: 1024px) {
-  /*  nav {*/
-  /*    text-align: left;*/
-  /*    margin-left: -1rem;*/
-  /*    font-size: 1rem;*/
-  /*    padding: 1rem 0;*/
-  /*    margin-top: 1rem;*/
-  /*  }*/
+@media (max-width: 768px) {
+  nav.tool-link {
+    display: none;
+    position: absolute;
+    top: 62px;
+    left: 0;
+    background-color: var(--color-header-background);
+    width: 100%;
+    padding: 20px;
+    z-index: 999;
+    box-shadow: 0px 2px 10px 2px rgb(0 0 0 / 30%);
+  }
+
+  header .burger {
+    display: inline-block;
+  }
 }
 </style>
