@@ -139,6 +139,7 @@
 
 .changeLog ul {
   list-style: none;
+  padding: 0;
 }
 
 .changeLog .thanks {
