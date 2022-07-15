@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch, onUnmounted, onMounted } from "vue";
 import JsonTree from "@/components/JsonTree.vue";
+import SwitchCheckbox from "@/components/SwitchCheckbox.vue";
 
 // example json
 // {"null":null,"boolean":[true,false],"number":[0,2.1,2e8,-123456780123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780],"string":{"any characters":"abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def","quotation \"":"\\","backslash \\\\":"\\\\","slash \\/":"\\/","backspace \\b":"\\b","form feed \\f":"\\f","new line \\n":"\\n","carriage return \\r":"\\r","tab \\t":"\\t","hexadeci\\u006Dal":"\\u004A-\\u005A"}}
@@ -16,19 +17,57 @@ const jsonObj = ref();
 let errorMessage = ref("");
 let copyText = ref("Copy");
 
+let isQuotationChecked = ref(false);
+const switchChecked = (isChecked) => {
+  isQuotationChecked.value = isChecked;
+  if (isChecked && jsonString.value === "") {
+    jsonString.value = '""';
+  } else if (!isChecked && jsonString.value === '""') {
+    jsonString.value = "";
+  } else {
+    renderResult(jsonString.value);
+  }
+};
+
 watch(jsonString, (userInput) => {
+  renderResult(userInput);
+});
+
+const renderResult = (userInput) => {
   try {
-    if (userInput === "") {
-      jsonObj.value = undefined;
+    if (isQuotationChecked.value) {
+      if (
+        userInput.length >= 2 &&
+        userInput.slice(0, 1) === '"' &&
+        userInput.slice(userInput.length - 1) === '"'
+      ) {
+        if (
+          userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"') !== ""
+        ) {
+          jsonObj.value = JSON.parse(
+            userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"')
+          );
+        } else {
+          jsonObj.value = undefined;
+        }
+        errorMessage.value = "";
+      } else {
+        jsonObj.value = undefined;
+        errorMessage.value = 'Input data must wrap by quotation marks("").';
+      }
     } else {
-      jsonObj.value = JSON.parse(userInput);
+      if (userInput === "") {
+        jsonObj.value = undefined;
+      } else {
+        jsonObj.value = JSON.parse(userInput);
+      }
+      errorMessage.value = "";
     }
-    errorMessage.value = "";
   } catch (e) {
     jsonObj.value = undefined;
     errorMessage.value = e.message;
   }
-});
+};
 
 let timer = null;
 // DOM
@@ -109,7 +148,14 @@ const handleMouseup = () => {
 <template>
   <div class="container">
     <div class="user-block" id="user-block" ref="userBlock">
-      <p class="block-title">Input</p>
+      <div class="block-title">
+        Input
+        <div class="radio-block">
+          In quotes("")?
+          <!-- Wrap by quotation("")? -->
+          <SwitchCheckbox v-on:switchChecked="switchChecked" />
+        </div>
+      </div>
       <textarea
         v-focus
         name="userInput"
@@ -125,7 +171,7 @@ const handleMouseup = () => {
         @mousedown="handleMouseDown"
       ></div>
 
-      <p class="block-title">Result</p>
+      <div class="block-title">Result</div>
       <div class="result-json" id="result-json">
         <div class="tree-json">
           <JsonTree v-if="jsonObj !== undefined" :json="jsonObj" />
@@ -148,12 +194,12 @@ const handleMouseup = () => {
 
 .user-block {
   width: 45%;
-  min-width: 150px;
+  min-width: 160px;
 }
 
 .result-block {
   width: calc(55% - 2px);
-  min-width: 150px;
+  min-width: 160px;
 }
 
 .drag-block {
@@ -172,9 +218,14 @@ const handleMouseup = () => {
 }
 
 .block-title {
-  padding: 10px;
+  padding: 0 10px;
   font-size: 20px;
   text-align: center;
+  height: 60px;
+}
+
+.block-title .radio-block {
+  font-size: 16px;
 }
 
 .user-json {
