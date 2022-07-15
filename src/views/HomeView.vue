@@ -24,6 +24,11 @@
       <div class="description">Special thanks in alphabetical order</div>
       <div class="log">
         <ul>
+          <li>
+            [July 15, 2022] Json Parser can parse data that wrapping by
+            quotation marks.
+            <span class="thanks">(thanks Claire)</span>
+          </li>
           <li>[Jun 23, 2022] Add burger for RWD.</li>
           <li>
             [Jun 21, 2022] Encode & Decode feature go live. Including base64 and
