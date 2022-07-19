@@ -1,5 +1,6 @@
 <script setup>
-import { ref, watch, onUnmounted } from "vue";
+import { ref, watch } from "vue";
+import CopiedBlock from "@/components/CopiedBlock.vue";
 
 const selectedType = ref("base64");
 const selectedMethod = ref("encode");
@@ -7,7 +8,6 @@ const selectedMethod = ref("encode");
 const userString = ref("");
 const resultString = ref("");
 let errorMessage = ref("");
-let copyText = ref("Copy");
 let typeDescription = ref("");
 
 watch(
@@ -64,38 +64,6 @@ watch(userString, (userInput) => {
   } catch (e) {
     errorMessage.value = e.message;
   }
-});
-let timer = null;
-// DOM
-const copy = ref(null);
-const copyToClipboard = () => {
-  clearTimeout(timer);
-  let clipboardText = ref("");
-  if (resultString.value !== "") {
-    clipboardText.value = resultString.value;
-  } else {
-    if (errorMessage.value !== "") {
-      clipboardText.value = errorMessage.value;
-    }
-  }
-  console.log(clipboardText.value);
-  navigator.clipboard
-    .writeText(clipboardText.value)
-    .then(() => {
-      copyText.value = "Copied!";
-      copy.value.style.backgroundColor = "#ed6b6b";
-      console.log("Copied to clipboard.");
-      timer = setTimeout(() => {
-        copyText.value = "Copy";
-        copy.value.style.backgroundColor = "#bb8e8e";
-      }, 1000);
-    })
-    .catch((err) => {
-      console.log("Can't copy!", err);
-    });
-};
-onUnmounted(() => {
-  clearTimeout(timer);
 });
 </script>
 
@@ -160,15 +128,13 @@ onUnmounted(() => {
       </div>
       <div class="result-block" id="result-block" ref="resultBlock">
         <p class="block-title">Result</p>
-        <div class="string-block" id="string-block">
-          <div class="result-string">
-            <p v-if="errorMessage === ''">{{ resultString }}</p>
-            <p v-else class="error-message">{{ errorMessage }}</p>
-          </div>
-          <button class="copy" ref="copy" @click="copyToClipboard()">
-            {{ copyText }} 📄
-          </button>
-        </div>
+        <CopiedBlock
+          :content="errorMessage === '' ? resultString : errorMessage"
+          type="string"
+        >
+          <p v-if="errorMessage === ''">{{ resultString }}</p>
+          <p v-else class="error-message">{{ errorMessage }}</p>
+        </CopiedBlock>
       </div>
     </div>
   </div>
@@ -265,23 +231,5 @@ onUnmounted(() => {
 .error-message {
   color: #d02451;
   font-weight: bold;
-}
-
-.copy {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background-color: #bb8e8e;
-  color: white;
-  border: 0;
-  padding: 8px 12px;
-  font-size: 14px;
-  cursor: pointer;
-  z-index: 2;
-  opacity: 0.5;
-}
-
-.string-block:hover > .copy {
-  opacity: 1;
 }
 </style>
