@@ -2,6 +2,7 @@
 import { ref, watch, onUnmounted, onMounted } from "vue";
 import JsonTree from "@/components/JsonTree.vue";
 import SwitchCheckbox from "@/components/SwitchCheckbox.vue";
+import CopiedBlock from "@/components/CopiedBlock.vue";
 
 // example json
 // {"null":null,"boolean":[true,false],"number":[0,2.1,2e8,-123456780123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780],"string":{"any characters":"abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def","quotation \"":"\\","backslash \\\\":"\\\\","slash \\/":"\\/","backspace \\b":"\\b","form feed \\f":"\\f","new line \\n":"\\n","carriage return \\r":"\\r","tab \\t":"\\t","hexadeci\\u006Dal":"\\u004A-\\u005A"}}
@@ -15,7 +16,6 @@ import SwitchCheckbox from "@/components/SwitchCheckbox.vue";
 const jsonString = ref("");
 const jsonObj = ref();
 let errorMessage = ref("");
-let copyText = ref("Copy");
 
 let isQuotationChecked = ref(false);
 const switchChecked = (isChecked) => {
@@ -69,38 +69,6 @@ const renderResult = (userInput) => {
   }
 };
 
-let timer = null;
-// DOM
-const copy = ref(null);
-
-const copyToClipboard = () => {
-  clearTimeout(timer);
-  let jsonFormat = ref("");
-
-  if (jsonObj.value !== undefined) {
-    jsonFormat.value = JSON.stringify(jsonObj.value, null, 2);
-  } else {
-    if (errorMessage.value !== "") {
-      jsonFormat.value = errorMessage.value;
-    }
-  }
-
-  navigator.clipboard
-    .writeText(jsonFormat.value)
-    .then(() => {
-      copyText.value = "Copied!";
-      copy.value.style.backgroundColor = "#ed6b6b";
-      console.log("Copied to clipboard.");
-      timer = setTimeout(() => {
-        copyText.value = "Copy";
-        copy.value.style.backgroundColor = "#bb8e8e";
-      }, 1000);
-    })
-    .catch((err) => {
-      console.log("Can't copy!", err);
-    });
-};
-
 let isDragging = ref(false);
 let lastMouseX = ref(0); // 按下當下 x 位置
 
@@ -126,7 +94,6 @@ onMounted(() => {
   window.addEventListener("mouseup", handleMouseup);
 });
 onUnmounted(() => {
-  clearTimeout(timer);
   window.removeEventListener("mousemove", handleMousemove);
   window.removeEventListener("mouseup", handleMouseup);
 });
@@ -172,15 +139,13 @@ const handleMouseup = () => {
       ></div>
 
       <div class="block-title">Result</div>
-      <div class="result-json" id="result-json">
-        <div class="tree-json">
-          <JsonTree v-if="jsonObj !== undefined" :json="jsonObj" />
-          <p v-else class="error-message">{{ errorMessage }}</p>
-        </div>
-        <button class="copy" ref="copy" @click="copyToClipboard()">
-          {{ copyText }} 📄
-        </button>
-      </div>
+      <CopiedBlock
+        :content="jsonObj !== undefined ? jsonObj : errorMessage"
+        :type="jsonObj !== undefined ? 'json' : 'string'"
+      >
+        <JsonTree v-if="jsonObj !== undefined" :json="jsonObj" />
+        <p v-else class="error-message">{{ errorMessage }}</p>
+      </CopiedBlock>
     </div>
   </div>
 </template>
@@ -258,23 +223,5 @@ const handleMouseup = () => {
 .error-message {
   color: #d02451;
   font-weight: bold;
-}
-
-.copy {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background-color: #bb8e8e;
-  color: white;
-  border: 0;
-  padding: 8px 12px;
-  font-size: 14px;
-  cursor: pointer;
-  z-index: 2;
-  opacity: 0.5;
-}
-
-.result-json:hover > .copy {
-  opacity: 1;
 }
 </style>
