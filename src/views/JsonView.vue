@@ -5,20 +5,20 @@ import SwitchCheckbox from "@/components/SwitchCheckbox.vue";
 import CopiedBlock from "@/components/CopiedBlock.vue";
 
 // example json
-// {"null":null,"boolean":[true,false],"number":[0,2.1,2e8,-123456780123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8,-123456780],"string":{"any characters":"abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def","quotation \"":"\\","backslash \\\\":"\\\\","slash \\/":"\\/","backspace \\b":"\\b","form feed \\f":"\\f","new line \\n":"\\n","carriage return \\r":"\\r","tab \\t":"\\t","hexadeci\\u006Dal":"\\u004A-\\u005A"}}
+// {"null":null,"boolean":[true,false],"number":[0,2.1,2e8,-123456780123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8],"string":{"any characters":"abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def","quotation \"":"\\","backslash \\\\":"\\\\","slash \\/":"\\/","backspace \\b":"\\b","form feed \\f":"\\f","new line \\n":"\\n","carriage return \\r":"\\r","tab \\t":"\\t","hexadeci\u006Dal":"\u004A-\u005A"}}
 // ["a", "b", { "c": 1 }]
-// {"a": 1, "b": [2,3,4]}
-// [2,3,4]
 // {"a": 1, "b": [2,{"c": ["d"]}]}
-// [{"a": 1, "b": [2,{"c": ["d"]}]}]
 // [{"a": 1, "b": [2,{"c": [{"a": 1, "b": [2,{"c": ["d"]}]}]}]}]
+// example unicode
+// "\"\\u6fb3\\u9580\\u570b\\u969b\\u6a5f\\u5834\""
+// "{\"data\":{\"timetable\":[{\"aircraftModel\":\"A321neo\",\"operatingAirlineCode\":\"JX\",\"depTerminal\":\"1\",\"depCity\":\"\\u81fa\\u5317\",\"depAirportName\":\"\\u81fa\\u7063\\u6843\\u5712\\u570b\\u969b\\u6a5f\\u5834\",\"arrAirport\":\"MFM\",\"arrCity\":\"\\u6fb3\\u9580\",\"arrAirportName\":\"\\u6fb3\\u9580\\u570b\\u969b\\u6a5f\\u5834\",\"duration\":105,\"arrivalDaysDifference\":0}]}}"
 
 const jsonString = ref("");
 const jsonObj = ref();
 let errorMessage = ref("");
 
 let isQuotationChecked = ref(false);
-const switchChecked = (isChecked) => {
+const switchInQuotes = (isChecked) => {
   isQuotationChecked.value = isChecked;
   if (isChecked && jsonString.value === "") {
     jsonString.value = '""';
@@ -27,6 +27,12 @@ const switchChecked = (isChecked) => {
   } else {
     renderResult(jsonString.value);
   }
+};
+
+let isUnicodeChecked = ref(false);
+const switchUnicode = (isChecked) => {
+  isUnicodeChecked.value = isChecked;
+  renderResult(jsonString.value);
 };
 
 watch(jsonString, (userInput) => {
@@ -44,9 +50,18 @@ const renderResult = (userInput) => {
         if (
           userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"') !== ""
         ) {
-          jsonObj.value = JSON.parse(
-            userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"')
-          );
+          if (isUnicodeChecked.value) {
+            jsonObj.value = JSON.parse(
+              userInput
+                .slice(1, userInput.length - 1)
+                .replaceAll('\\"', '"')
+                .replaceAll("\\\\u", "\\u")
+            );
+          } else {
+            jsonObj.value = JSON.parse(
+              userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"')
+            );
+          }
         } else {
           jsonObj.value = undefined;
         }
@@ -59,7 +74,11 @@ const renderResult = (userInput) => {
       if (userInput === "") {
         jsonObj.value = undefined;
       } else {
-        jsonObj.value = JSON.parse(userInput);
+        if (isUnicodeChecked.value) {
+          jsonObj.value = JSON.parse(userInput);
+        } else {
+          jsonObj.value = JSON.parse(userInput.replaceAll(/\\u/g, "\\\\u"));
+        }
       }
       errorMessage.value = "";
     }
@@ -120,7 +139,7 @@ const handleMouseup = () => {
         <div class="radio-block">
           In quotes("")?
           <!-- Wrap by quotation("")? -->
-          <SwitchCheckbox v-on:switchChecked="switchChecked" />
+          <SwitchCheckbox v-on:switchChecked="switchInQuotes" />
         </div>
       </div>
       <textarea
@@ -138,12 +157,22 @@ const handleMouseup = () => {
         @mousedown="handleMouseDown"
       ></div>
 
-      <div class="block-title">Result</div>
+      <div class="block-title">
+        Result
+        <div class="radio-block">
+          Parse Unicode?
+          <SwitchCheckbox v-on:switchChecked="switchUnicode" />
+        </div>
+      </div>
       <CopiedBlock
         :content="jsonObj !== undefined ? jsonObj : errorMessage"
         :type="jsonObj !== undefined ? 'json' : 'string'"
       >
-        <JsonTree v-if="jsonObj !== undefined" :json="jsonObj" />
+        <JsonTree
+          v-if="jsonObj !== undefined"
+          :json="jsonObj"
+          :transUnicode="isUnicodeChecked"
+        />
         <p v-else class="error-message">{{ errorMessage }}</p>
       </CopiedBlock>
     </div>
@@ -164,7 +193,7 @@ const handleMouseup = () => {
 
 .result-block {
   width: calc(55% - 2px);
-  min-width: 160px;
+  min-width: 175px;
 }
 
 .drag-block {

@@ -25,7 +25,9 @@ const copyToClipboard = () => {
     if (props.type === "string") {
       clipboardText.value = props.content;
     } else {
-      clipboardText.value = JSON.stringify(props.content, null, 2);
+      clipboardText.value = JSON.stringify(props.content, null, 2)
+        .replace(/\\"/g, '"')
+        .replaceAll(/\\\\/g, "\\");
     }
   }
 
