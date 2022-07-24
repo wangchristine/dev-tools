@@ -1,19 +1,19 @@
 <script setup>
 import { ref } from "vue";
 
-defineEmits(["switchChecked"]);
+const emit = defineEmits(["switchChecked"]);
 
-const isChecked = ref(false);
+let isChecked = ref(false);
+
+const toggleCheckbox = () => {
+  isChecked.value = !isChecked.value;
+  emit("switchChecked", isChecked.value);
+};
 </script>
 
 <template>
-  <input
-    type="checkbox"
-    id="switch"
-    v-model="isChecked"
-    @change="$emit('switchChecked', isChecked)"
-  />
-  <label for="switch" class="switchToggle"> </label>
+  <input type="checkbox" v-model="isChecked" />
+  <label class="switchToggle" @click="toggleCheckbox"> </label>
 </template>
 
 <style scoped>

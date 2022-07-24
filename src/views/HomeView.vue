@@ -25,6 +25,10 @@
       <div class="log">
         <ul>
           <li>
+            [July 24, 2022] Json Parser can parse unicode(\u) by switching checkbox.
+            <span class="thanks">(thanks Alice, Carol, Helio)</span>
+          </li>
+          <li>
             [July 15, 2022] Json Parser can parse data that wrapping by
             quotation marks.
             <span class="thanks">(thanks Claire)</span>

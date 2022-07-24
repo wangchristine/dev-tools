@@ -5,6 +5,7 @@ export default {
   props: {
     json: [Array, Object, String, Number, Boolean],
     objectKey: String,
+    transUnicode: Boolean,
   },
   setup(props) {
     const open = ref(true);
@@ -34,8 +35,8 @@ export default {
 </script>
 
 <template>
-  <span v-if="props.objectKey" class="object-key" @click.stop="open = !open"
-    >"{{ props.objectKey }}":
+  <span v-if="props.objectKey" class="object-key" @click.stop="open = !open">
+    "{{ props.objectKey }}":
   </span>
   <template v-if="props.json !== null && typeof props.json == 'object'">
     <template v-if="props.json.constructor.name === 'Array'">
@@ -47,7 +48,7 @@ export default {
       <span class="count"></span>
       <ul v-show="open">
         <li v-for="(child, key) in props.json" :key="key">
-          <JsonTree :json="child" />
+          <JsonTree :json="child" :transUnicode="props.transUnicode" />
           <span v-if="props.json.length !== key + 1">, </span>
         </li>
       </ul>
@@ -62,7 +63,11 @@ export default {
       <span class="count"></span>
       <ul v-show="open">
         <li v-for="(child, key) in props.json" :key="key">
-          <JsonTree :objectKey="key" :json="child" />
+          <JsonTree
+            :objectKey="key"
+            :json="child"
+            :transUnicode="props.transUnicode"
+          />
           <span
             v-if="
               key !==
@@ -76,9 +81,9 @@ export default {
     </template>
   </template>
   <template v-else>
-    <span v-if="typeof props.json === 'string'" :class="typeof props.json"
-      >"{{ props.json }}"</span
-    >
+    <span v-if="typeof props.json === 'string'" :class="typeof props.json">
+      "{{ props.json }}"
+    </span>
     <span v-else-if="typeof props.json === 'object'" class="null">null</span>
     <span v-else :class="typeof props.json">{{ props.json }}</span>
   </template>
