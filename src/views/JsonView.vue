@@ -10,6 +10,7 @@ import CopiedBlock from "@/components/CopiedBlock.vue";
 // {"a": 1, "b": [2,{"c": ["d"]}]}
 // [{"a": 1, "b": [2,{"c": [{"a": 1, "b": [2,{"c": ["d"]}]}]}]}]
 // example unicode
+// {"payload":{"depCity":"\u81fa\u5317", "body":"{\"data\":{\"flights\":[{\"depAirport\":\"TPE\",\"depCity\":\"\\u81fa\\u5317\",\"arrCity\":\"\\u65b0\\u52a0\\u5761\"}]}}"}}
 // "\"\\u6fb3\\u9580\\u570b\\u969b\\u6a5f\\u5834\""
 // "{\"data\":{\"timetable\":[{\"aircraftModel\":\"A321neo\",\"operatingAirlineCode\":\"JX\",\"depTerminal\":\"1\",\"depCity\":\"\\u81fa\\u5317\",\"depAirportName\":\"\\u81fa\\u7063\\u6843\\u5712\\u570b\\u969b\\u6a5f\\u5834\",\"arrAirport\":\"MFM\",\"arrCity\":\"\\u6fb3\\u9580\",\"arrAirportName\":\"\\u6fb3\\u9580\\u570b\\u969b\\u6a5f\\u5834\",\"duration\":105,\"arrivalDaysDifference\":0}]}}"
 
@@ -55,11 +56,15 @@ const renderResult = (userInput) => {
               userInput
                 .slice(1, userInput.length - 1)
                 .replaceAll('\\"', '"')
-                .replaceAll("\\\\u", "\\u")
+                .replaceAll(/\\u/g, "u")
             );
           } else {
             jsonObj.value = JSON.parse(
-              userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"')
+              userInput
+                .slice(1, userInput.length - 1)
+                .replaceAll('\\"', '"')
+                .replaceAll(/\\u/g, "u")
+                .replaceAll(/\\u/g, "\\\\u")
             );
           }
         } else {
@@ -75,9 +80,11 @@ const renderResult = (userInput) => {
         jsonObj.value = undefined;
       } else {
         if (isUnicodeChecked.value) {
-          jsonObj.value = JSON.parse(userInput);
+          jsonObj.value = JSON.parse(userInput.replaceAll(/\\\\u/g, "\\u"));
         } else {
-          jsonObj.value = JSON.parse(userInput.replaceAll(/\\u/g, "\\\\u"));
+          jsonObj.value = JSON.parse(
+            userInput.replaceAll(/(?<=[^\\])\\u/g, "\\\\u")
+          );
         }
       }
       errorMessage.value = "";
