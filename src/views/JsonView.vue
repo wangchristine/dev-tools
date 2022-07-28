@@ -56,15 +56,11 @@ const renderResult = (userInput) => {
               userInput
                 .slice(1, userInput.length - 1)
                 .replaceAll('\\"', '"')
-                .replaceAll(/\\u/g, "u")
+                .replaceAll(/\\\\u/g, "\\u")
             );
           } else {
             jsonObj.value = JSON.parse(
-              userInput
-                .slice(1, userInput.length - 1)
-                .replaceAll('\\"', '"')
-                .replaceAll(/\\u/g, "u")
-                .replaceAll(/\\u/g, "\\\\u")
+              userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"')
             );
           }
         } else {
