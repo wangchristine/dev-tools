@@ -68,7 +68,7 @@ onUnmounted(() => {
   color: var(--color-block-text3);
   border: black 1px solid;
   height: calc(100% - 60px);
-  background-color: var(--color-block-background);
+  background-color: var(--color-block-background1);
 }
 .result-content {
   position: absolute;

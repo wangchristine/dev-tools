@@ -209,7 +209,7 @@ watch(userString, (userInput) => {
   overflow-y: scroll;
   resize: none;
   font-size: 16px;
-  background-color: var(--color-block-background);
+  background-color: var(--color-block-background1);
   color: var(--color-block-text1);
 }
 
@@ -217,7 +217,7 @@ watch(userString, (userInput) => {
   color: var(--color-block-text3);
   border: black 1px solid;
   height: calc(100% - 52px);
-  background-color: var(--color-block-background);
+  background-color: var(--color-block-background1);
 }
 
 .result-string {

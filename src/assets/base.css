@@ -15,8 +15,10 @@
   --vt-c-text-light: #2c3e50;
   --vt-c-text-dark: rgba(235, 235, 235, 0.64);
 
-  --vt-c-block-background-light: #ffffff;
-  --vt-c-block-background-dark: #2a2a2a;
+  --vt-c-block-background-light1: #ffffff;
+  --vt-c-block-background-dark1: #2a2a2a;
+  --vt-c-block-background-light2: #eaeaea;
+  --vt-c-block-background-dark2: #515151;
 
   --vt-c-block-text-light1: #000000;
   --vt-c-block-text-dark1: #bdbdbd;
@@ -38,7 +40,8 @@
   --color-background: var(--vt-c-background-light);
   --color-text: var(--vt-c-text-light);
 
-  --color-block-background: var(--vt-c-block-background-light);
+  --color-block-background1: var(--vt-c-block-background-light1);
+  --color-block-background2: var(--vt-c-block-background-light2);
   --color-block-text1: var(--vt-c-block-text-light1);
   --color-block-text2: var(--vt-c-block-text-light2);
   --color-block-text3: var(--vt-c-block-text-light3);
@@ -53,7 +56,8 @@
   --color-background: var(--vt-c-background-dark);
   --color-text: var(--vt-c-text-dark);
 
-  --color-block-background: var(--vt-c-block-background-dark);
+  --color-block-background1: var(--vt-c-block-background-dark1);
+  --color-block-background2: var(--vt-c-block-background-dark2);
   --color-block-text1: var(--vt-c-block-text-dark1);
   --color-block-text2: var(--vt-c-block-text-dark2);
   --color-block-text3: var(--vt-c-block-text-dark3);

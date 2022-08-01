@@ -3,6 +3,7 @@ import HomeView from "../views/HomeView.vue";
 import JsonView from "../views/JsonView.vue";
 import EncodeDecodeView from "../views/EncodeDecodeView.vue";
 import ErrorView from "../views/ErrorView.vue";
+import ImageEditorView from "../views/ImageEditorView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,6 +22,11 @@ const router = createRouter({
       path: "/encode-decode",
       name: "encode-decode",
       component: EncodeDecodeView,
+    },
+    {
+      path: "/image-editor",
+      name: "image-editor",
+      component: ImageEditorView,
     },
     {
       path: "/:pathMatch(.*)*",
