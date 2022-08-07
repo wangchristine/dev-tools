@@ -6,9 +6,20 @@ module.exports = {
   extends: [
     "plugin:vue/vue3-essential",
     "eslint:recommended",
-    "@vue/eslint-config-prettier",
+    // this tool sucks...
+    // "@vue/eslint-config-prettier",
   ],
   env: {
     "vue/setup-compiler-macros": true,
+  },
+  // seems useless
+  rules: {
+    "vue/max-attributes-per-line": [
+      "error",
+      {
+        singleline: 5,
+        multiline: 5,
+      },
+    ],
   },
 };
