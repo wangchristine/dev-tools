@@ -66,9 +66,18 @@ const switchResize = () => {
     if (needResize.value) {
       inputWidth.value.disabled = false;
       inputHeight.value.disabled = false;
+
+      if (resizeType.value === "percent") {
+        const rate = resizeWidth.value / 100;
+        renderCanvas(image.value.width * rate, image.value.height * rate);
+      } else {
+        const rate = resizeWidth.value / image.value.width;
+        renderCanvas(resizeWidth.value, image.value.height * rate);
+      }
     } else {
       inputWidth.value.disabled = true;
       inputHeight.value.disabled = true;
+      renderCanvas(image.value.width, image.value.height);
     }
   }
 };
@@ -104,7 +113,7 @@ const inputWidthInputEvent = () => {
       }
       const rate = resizeWidth.value / image.value.width;
       resizeHeight.value = Math.floor(image.value.height * rate);
-      renderCanvas(image.value.width * rate, image.value.height * rate);
+      renderCanvas(resizeWidth.value, image.value.height * rate);
     }
   }
 };
@@ -126,7 +135,7 @@ const inputHeightInputEvent = () => {
       }
       const rate = resizeHeight.value / image.value.height;
       resizeWidth.value = Math.floor(image.value.width * rate);
-      renderCanvas(image.value.width * rate, image.value.height * rate);
+      renderCanvas(image.value.width * rate, resizeHeight.value);
     }
   }
 }
