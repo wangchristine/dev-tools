@@ -188,7 +188,7 @@ onUnmounted(() => {
           <div class="tools">
             <div>
               Type:
-              <SwitchCheckbox v-on:switchChecked="switchResizeType"/>
+              <SwitchCheckbox :disable="image === null || needResize === false" v-on:switchChecked="switchResizeType"/>
               <span v-if="resizeType === 'percent'"> Percent(%)</span>
               <span v-if="resizeType === 'pixel'"> Pixel(px)</span>
             </div>
