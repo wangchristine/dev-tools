@@ -233,7 +233,7 @@ const handleMouseup = () => {
   overflow-y: scroll;
   resize: none;
   font-size: 16px;
-  background-color: var(--color-block-background);
+  background-color: var(--color-block-background1);
   color: var(--color-block-text1);
 }
 
@@ -241,7 +241,7 @@ const handleMouseup = () => {
   color: var(--color-block-text3);
   border: black 1px solid;
   height: calc(100% - 60px);
-  background-color: var(--color-block-background);
+  background-color: var(--color-block-background1);
 }
 
 .tree-json {

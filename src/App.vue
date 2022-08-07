@@ -50,6 +50,7 @@ const toggleBurger = () => {
       <RouterLink :to="{ name: 'home' }">Home</RouterLink>
       <RouterLink :to="{ name: 'json' }">Json Parser</RouterLink>
       <RouterLink :to="{ name: 'encode-decode' }">Encode & Decode</RouterLink>
+      <RouterLink :to="{ name: 'image-editor' }">Image Editor</RouterLink>
     </nav>
     <button class="burger" @click="toggleBurger">≡</button>
     <span class="header-right">

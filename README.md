@@ -12,6 +12,7 @@ Go to [Dev Tools](https://wangchristine.github.io/dev-tools/) and have fun!
 
 1. Json Parser
 2. Encode & Decode - for base64, url
+3. Image Editor
 
 ## Special thanks :D
 

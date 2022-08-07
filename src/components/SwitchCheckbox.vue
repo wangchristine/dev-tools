@@ -1,18 +1,27 @@
 <script setup>
 import { ref } from "vue";
 
+const props = defineProps({
+  disable: {
+    type: [Boolean],
+    required: false,
+    default: false,
+  }
+});
 const emit = defineEmits(["switchChecked"]);
 
 let isChecked = ref(false);
 
 const toggleCheckbox = () => {
-  isChecked.value = !isChecked.value;
-  emit("switchChecked", isChecked.value);
+  if (!props.disable) {
+    isChecked.value = !isChecked.value;
+    emit("switchChecked", isChecked.value);
+  }
 };
 </script>
 
 <template>
-  <input type="checkbox" v-model="isChecked" />
+  <input type="checkbox" v-model="isChecked"/>
   <label class="switchToggle" @click="toggleCheckbox"> </label>
 </template>
 

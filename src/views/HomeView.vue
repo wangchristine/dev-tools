@@ -25,6 +25,9 @@
       <div class="log">
         <ul>
           <li>
+            [Aug 7, 2022] Image Editor feature go live.
+          </li>
+          <li>
             [July 24, 2022] Json Parser can parse unicode(\u) by switching checkbox.
             <span class="thanks">(thanks Alice, Carol, Helio)</span>
           </li>
