@@ -8,19 +8,33 @@ let needResize = ref(false);
 let resizeType = ref("percent");
 let resizeWidth = ref(100);
 let resizeHeight = ref(100);
+let needWatermark = ref(false);
+let watermarkText = ref("@Chris Wang");
 // dom
 let canvas = ref(null);
 let resize = ref(null);
 let inputWidth = ref(null);
 let inputHeight = ref(null);
+let watermark = ref(null);
+let inputWatermarkText = ref(null);
 let download = ref(null);
 
-const renderCanvas = (canvasWidth, canvasHeight) => {
+const renderCanvas = ({ canvasWidth, canvasHeight, watermarkText }) => {
   let ctx = canvas.value.getContext("2d");
   ctx.clearRect(0, 0, canvas.value.width, canvas.value.height);
-  canvas.value.width = canvasWidth;
-  canvas.value.height = canvasHeight;
-  ctx.drawImage(image.value, 0, 0, image.value.width, image.value.height, 0, 0, canvasWidth, canvasHeight);
+
+  if (canvasWidth !== undefined && canvasHeight !== undefined) {
+    canvas.value.width = canvasWidth;
+    canvas.value.height = canvasHeight;
+  }
+  ctx.drawImage(image.value, 0, 0, image.value.width, image.value.height, 0, 0, canvas.value.width, canvas.value.height);
+
+  if (watermarkText !== undefined) {
+    ctx.font = "30px Comic Sans MS";
+    ctx.fillStyle = "#da94f1";
+    ctx.textAlign = "center";
+    ctx.fillText(watermarkText, canvas.value.width / 2, Math.floor(canvas.value.height * (2 / 3)));
+  }
 }
 
 const uploadImage = (event) => {
@@ -44,6 +58,7 @@ const uploadImage = (event) => {
     ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.value.width, canvas.value.height);
   };
   resize.value.disabled = false;
+  watermark.value.disabled = false;
   download.value.disabled = false;
 };
 
@@ -66,13 +81,30 @@ const switchResize = () => {
     if (needResize.value) {
       inputWidth.value.disabled = false;
       inputHeight.value.disabled = false;
+
+      if (resizeType.value === "percent") {
+        const rate = resizeWidth.value / 100;
+        renderCanvas({
+          canvasWidth: image.value.width * rate,
+          canvasHeight: image.value.height * rate, ...(needWatermark.value && { watermarkText: watermarkText.value })
+        });
+      } else {
+        const rate = resizeWidth.value / image.value.width;
+        renderCanvas({
+          canvasWidth: resizeWidth.value,
+          canvasHeight: image.value.height * rate, ...(needWatermark.value && { watermarkText: watermarkText.value })
+        });
+      }
     } else {
       inputWidth.value.disabled = true;
       inputHeight.value.disabled = true;
+      renderCanvas({
+        canvasWidth: image.value.width,
+        canvasHeight: image.value.height, ...(needWatermark.value && { watermarkText: watermarkText.value })
+      });
     }
   }
 };
-
 const switchResizeType = (isChecked) => {
   resizeType.value = isChecked ? "pixel" : "percent";
   if (image.value) {
@@ -83,7 +115,10 @@ const switchResizeType = (isChecked) => {
       resizeWidth.value = image.value.width;
       resizeHeight.value = image.value.height;
     }
-    renderCanvas(image.value.width, image.value.height);
+    renderCanvas({
+      canvasWidth: image.value.width,
+      canvasHeight: image.value.height, ...(needWatermark.value && { watermarkText: watermarkText.value })
+    });
   }
 };
 
@@ -96,7 +131,10 @@ const inputWidthInputEvent = () => {
     }
     resizeHeight.value = resizeWidth.value;
     const rate = resizeWidth.value / 100;
-    renderCanvas(image.value.width * rate, image.value.height * rate);
+    renderCanvas({
+      canvasWidth: image.value.width * rate,
+      canvasHeight: image.value.height * rate, ...(needWatermark.value && { watermarkText: watermarkText.value })
+    });
   } else {
     if (image.value) {
       if (resizeWidth.value > image.value.width) {
@@ -104,7 +142,10 @@ const inputWidthInputEvent = () => {
       }
       const rate = resizeWidth.value / image.value.width;
       resizeHeight.value = Math.floor(image.value.height * rate);
-      renderCanvas(image.value.width * rate, image.value.height * rate);
+      renderCanvas({
+        canvasWidth: resizeWidth.value,
+        canvasHeight: image.value.height * rate, ...(needWatermark.value && { watermarkText: watermarkText.value })
+      });
     }
   }
 };
@@ -118,7 +159,10 @@ const inputHeightInputEvent = () => {
     }
     resizeWidth.value = resizeHeight.value;
     const rate = (resizeHeight.value / 100);
-    renderCanvas(image.value.width * rate, image.value.height * rate);
+    renderCanvas({
+      canvasWidth: image.value.width * rate,
+      canvasHeight: image.value.height * rate, ...(needWatermark.value && { watermarkText: watermarkText.value })
+    });
   } else {
     if (image.value) {
       if (resizeHeight.value > image.value.height) {
@@ -126,13 +170,33 @@ const inputHeightInputEvent = () => {
       }
       const rate = resizeHeight.value / image.value.height;
       resizeWidth.value = Math.floor(image.value.width * rate);
-      renderCanvas(image.value.width * rate, image.value.height * rate);
+      renderCanvas({
+        canvasWidth: image.value.width * rate,
+        canvasHeight: resizeHeight.value, ...(needWatermark.value && { watermarkText: watermarkText.value })
+      });
     }
   }
 }
 
 const limitInputNumber = (event) => {
   return event.charCode >= 48 && event.charCode <= 57;
+};
+
+const inputWatermarkTextInputEvent = () => {
+  renderCanvas({ watermarkText: watermarkText.value });
+};
+
+const switchWatermark = () => {
+  needWatermark.value = !needWatermark.value;
+  if (image.value) {
+    if (needWatermark.value) {
+      inputWatermarkText.value.disabled = false;
+      renderCanvas({ watermarkText: watermarkText.value });
+    } else {
+      inputWatermarkText.value.disabled = true;
+      renderCanvas({});
+    }
+  }
 };
 
 onUnmounted(() => {
@@ -199,6 +263,17 @@ onUnmounted(() => {
               Height:
               <input type="number" v-model.number="resizeHeight" ref="inputHeight" min="1" step="1"
                      :onkeypress="limitInputNumber" @input="inputHeightInputEvent" disabled/>
+            </div>
+          </div>
+        </div>
+        <div class="watermark">
+          <input type="checkbox" ref="watermark" id="watermark" @change="switchWatermark" disabled/>
+          <label for="watermark"> Watermark</label>
+          <div class="tools">
+            <div>
+              Text:
+              <input type="text" v-model.trim="watermarkText" ref="inputWatermarkText"
+                     @input="inputWatermarkTextInputEvent" disabled/>
             </div>
           </div>
         </div>
@@ -305,6 +380,12 @@ onUnmounted(() => {
   padding: 5px;
   font-size: 18px;
   max-width: 30%;
+  letter-spacing: 2px;
+}
+
+.tools input[type="text"] {
+  padding: 5px;
+  font-size: 18px;
   letter-spacing: 2px;
 }
 
