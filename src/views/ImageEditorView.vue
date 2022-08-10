@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onUnmounted } from "vue";
 import SwitchCheckbox from "@/components/SwitchCheckbox.vue";
+import RangeSlider from "@/components/RangeSlider.vue";
 
 let imageOrigin = ref(null);
 let image = ref(null);
@@ -10,6 +11,7 @@ let resizeWidth = ref(100);
 let resizeHeight = ref(100);
 let needWatermark = ref(false);
 let watermarkText = ref("@Chris Wang🌱");
+let watermarkSize = ref(30);
 // dom
 let canvas = ref(null);
 let resize = ref(null);
@@ -30,7 +32,7 @@ const renderCanvas = ({ canvasWidth, canvasHeight, watermarkText }) => {
   ctx.drawImage(image.value, 0, 0, image.value.width, image.value.height, 0, 0, canvas.value.width, canvas.value.height);
 
   if (watermarkText !== undefined) {
-    ctx.font = "30px Comic Sans MS";
+    ctx.font = `${watermarkSize.value}px Comic Sans MS`;
     ctx.fillStyle = "#da94f1";
     ctx.textAlign = "center";
     ctx.fillText(watermarkText, canvas.value.width / 2, Math.floor(canvas.value.height * (2 / 3)));
@@ -198,6 +200,10 @@ const switchWatermark = () => {
     }
   }
 };
+const slideWatermarkSize = (sliderValue) => {
+  watermarkSize.value = sliderValue;
+  renderCanvas({ watermarkText: watermarkText.value });
+};
 
 onUnmounted(() => {
   if (image.value) {
@@ -274,6 +280,11 @@ onUnmounted(() => {
               Text:
               <input type="text" v-model.trim="watermarkText" ref="inputWatermarkText"
                      @input="inputWatermarkTextInputEvent" disabled/>
+            </div>
+            <div>
+              Size:
+              <RangeSlider :value="watermarkSize" :min="12" :max="72"
+                           :disable="image === null || needWatermark === false" @slideRange="slideWatermarkSize"/>
             </div>
           </div>
         </div>
@@ -390,6 +401,10 @@ onUnmounted(() => {
   font-size: 18px;
   max-width: 100%;
   letter-spacing: 2px;
+}
+
+.tools .slider {
+  max-width: 90%;
 }
 
 .draw-tool .download {
