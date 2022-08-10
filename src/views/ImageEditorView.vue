@@ -9,7 +9,7 @@ let resizeType = ref("percent");
 let resizeWidth = ref(100);
 let resizeHeight = ref(100);
 let needWatermark = ref(false);
-let watermarkText = ref("@Chris Wang");
+let watermarkText = ref("@Chris Wang🌱");
 // dom
 let canvas = ref(null);
 let resize = ref(null);
@@ -50,9 +50,9 @@ const uploadImage = (event) => {
     canvas.value.height = img.height;
 
     if (img.width >= img.height) {
-      canvas.value.style.width = "100%";
+      canvas.value.style.maxWidth = "100%";
     } else {
-      canvas.value.style.height = "30vw";
+      canvas.value.style.maxHeight = "500px";
     }
 
     ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.value.width, canvas.value.height);
@@ -221,7 +221,7 @@ onUnmounted(() => {
         <input type="file" name="userImage" id="userImage" accept="image/*" @change="uploadImage"/>
       </label>
       <div class="preview-block" v-else>
-        <canvas ref="canvas" id="canvas" class="preview-image" width="800" height="450"></canvas>
+        <canvas ref="canvas" id="canvas" class="preview-image" width="800" height="500"></canvas>
       </div>
     </div>
     <div class="information-block">
@@ -293,7 +293,7 @@ onUnmounted(() => {
 }
 
 .image-block {
-  width: 60%;
+  width: 65%;
 }
 
 .image-block .title {
@@ -305,7 +305,7 @@ onUnmounted(() => {
 .upload-file {
   display: block;
   width: 100%;
-  height: 450px;
+  height: 500px;
   background-color: var(--color-block-background2);
   text-align: center;
   margin-top: 10px;
@@ -316,7 +316,7 @@ onUnmounted(() => {
 
 .upload-file .upload-block {
   border: dashed 2px;
-  padding: 140px 40px;
+  padding: 160px 40px;
   height: 100%;
 }
 
@@ -340,11 +340,13 @@ onUnmounted(() => {
   align-items: center;
   background-color: var(--color-block-background2);
   margin-top: 10px;
+  width: 100%;
+  height: 500px;
 }
 
 .information-block {
-  width: 40%;
-  margin-left: 10px;
+  width: 35%;
+  margin-left: 15px;
   font-size: 18px;
 }
 
@@ -386,6 +388,7 @@ onUnmounted(() => {
 .tools input[type="text"] {
   padding: 5px;
   font-size: 18px;
+  max-width: 100%;
   letter-spacing: 2px;
 }
 
