@@ -2,6 +2,7 @@
 import { ref, onUnmounted } from "vue";
 import SwitchCheckbox from "@/components/SwitchCheckbox.vue";
 import RangeSlider from "@/components/RangeSlider.vue";
+import imageTypes from "@/config/imageType.json";
 
 let imageOrigin = ref(null);
 let image = ref(null);
@@ -12,6 +13,8 @@ let resizeHeight = ref(100);
 let needWatermark = ref(false);
 let watermarkText = ref("@Chris Wang🌱");
 let watermarkSize = ref(30);
+let downloadImageType = ref("jpg");
+let downloadImageQuantity = ref(90);
 // dom
 let canvas = ref(null);
 let resize = ref(null);
@@ -65,16 +68,20 @@ const uploadImage = (event) => {
 };
 
 const downloadImage = () => {
+  const getImageMimeType = imageTypes.find((imageType) => {
+    return imageType.name === downloadImageType.value;
+  }).mimeType;
+
   canvas.value.toBlob((blob) => {
     const downloadLink = document.createElement("a");
     const url = URL.createObjectURL(blob);
     downloadLink.href = url;
-    downloadLink.download = "circle.jpg"; // 修改
+    downloadLink.download = `circle.${downloadImageType.value}`; // 修改
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
     URL.revokeObjectURL(url);
-  }, "image/jpeg"); // 修改
+  }, getImageMimeType, downloadImageQuantity.value / 100); // 修改
 };
 
 const switchResize = () => {
@@ -204,6 +211,9 @@ const slideWatermarkSize = (sliderValue) => {
   watermarkSize.value = sliderValue;
   renderCanvas({ watermarkText: watermarkText.value });
 };
+const slideImageQuantity = (sliderValue) => {
+  downloadImageQuantity.value = sliderValue;
+};
 
 onUnmounted(() => {
   if (image.value) {
@@ -287,6 +297,25 @@ onUnmounted(() => {
                            :disable="image === null || needWatermark === false" @slideRange="slideWatermarkSize"/>
             </div>
           </div>
+        </div>
+        <div class="final-block">
+          Download image type:
+          <div class="tools">
+            <div class="image-type">
+              <template v-for="(imageType, key) in imageTypes" :key="key">
+                <input type="radio" name="imageType" :id="imageType.name" :value="imageType.name"
+                       v-model="downloadImageType" :checked="key === 0">
+                <label class="text" :for="imageType.name">{{ imageType.name.toUpperCase() }}</label>
+              </template>
+            </div>
+          </div>
+          <template v-if="downloadImageType === 'jpg'">
+            select image quantity:
+            <div class="tools">
+              <RangeSlider :value="downloadImageQuantity" :min="10" :max="100" :step="10"
+                           @slideRange="slideImageQuantity"/>
+            </div>
+          </template>
         </div>
         <button ref="download" name="download" class="download" @click="downloadImage" disabled>
           Download
@@ -422,5 +451,38 @@ onUnmounted(() => {
   background-color: var(--color-background);
   color: #b1b0b0;
   cursor: not-allowed;
+}
+
+.final-block {
+  margin-top: 20px;
+  padding-top: 10px;
+  border-top: 1px solid;
+}
+
+.image-type {
+  margin: 10px 0;
+}
+
+.image-type input[type=radio] {
+  display: none;
+  opacity: 0;
+  height: 0;
+  width: 0;
+}
+
+.image-type .text {
+  cursor: pointer;
+  background-color: #b5b5b5;
+  margin: 0 5px;
+  padding: 4px 12px;
+}
+
+.image-type input[type=radio]:checked + .text {
+  background-color: #60b699;
+  color: #fff;
+}
+
+.final-block .slider {
+  max-width: 100%;
 }
 </style>
