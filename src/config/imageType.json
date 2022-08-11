@@ -1,0 +1,14 @@
+[
+  {
+    "name": "jpg",
+    "mimeType": "image/jpeg"
+  },
+  {
+    "name": "png",
+    "mimeType": "image/png"
+  },
+  {
+    "name": "gif",
+    "mimeType": "image/gif"
+  }
+]
