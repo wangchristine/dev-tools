@@ -14,7 +14,8 @@ let needWatermark = ref(false);
 let watermarkText = ref("@Chris Wang🌱");
 let watermarkSize = ref(30);
 let downloadImageType = ref("jpg");
-let downloadImageQuantity = ref(90);
+let downloadImageQuality = ref(90);
+let expectImageSize = ref(null);
 // dom
 let canvas = ref(null);
 let resize = ref(null);
@@ -48,19 +49,14 @@ const uploadImage = (event) => {
   let img = new Image();
   img.src = URL.createObjectURL(imageOrigin.value);
   img.onload = () => {
-    let ctx = canvas.value.getContext("2d");
     image.value = img;
-
-    canvas.value.width = img.width;
-    canvas.value.height = img.height;
-
     if (img.width >= img.height) {
       canvas.value.style.maxWidth = "100%";
     } else {
       canvas.value.style.maxHeight = "500px";
     }
-
-    ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, canvas.value.width, canvas.value.height);
+    renderCanvas({ canvasWidth: img.width, canvasHeight: img.height });
+    setExpectImageSize();
   };
   resize.value.disabled = false;
   watermark.value.disabled = false;
@@ -76,12 +72,12 @@ const downloadImage = () => {
     const downloadLink = document.createElement("a");
     const url = URL.createObjectURL(blob);
     downloadLink.href = url;
-    downloadLink.download = `circle.${downloadImageType.value}`; // 修改
+    downloadLink.download = `Dev-Tools_${imageOrigin.value.name.slice(0, imageOrigin.value.name.lastIndexOf("."))}.${downloadImageType.value}`;
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
     URL.revokeObjectURL(url);
-  }, getImageMimeType, downloadImageQuantity.value / 100); // 修改
+  }, getImageMimeType, downloadImageQuality.value / 100);
 };
 
 const switchResize = () => {
@@ -114,6 +110,7 @@ const switchResize = () => {
     }
   }
 };
+
 const switchResizeType = (isChecked) => {
   resizeType.value = isChecked ? "pixel" : "percent";
   if (image.value) {
@@ -207,12 +204,31 @@ const switchWatermark = () => {
     }
   }
 };
+
 const slideWatermarkSize = (sliderValue) => {
   watermarkSize.value = sliderValue;
   renderCanvas({ watermarkText: watermarkText.value });
 };
-const slideImageQuantity = (sliderValue) => {
-  downloadImageQuantity.value = sliderValue;
+
+const imageTypeChangeEvent = () => {
+  setExpectImageSize();
+}
+
+const slideImageQuality = (sliderValue) => {
+  downloadImageQuality.value = sliderValue;
+  setExpectImageSize();
+};
+
+const setExpectImageSize = () => {
+  if (image.value) {
+    const getImageMimeType = imageTypes.find((imageType) => {
+      return imageType.name === downloadImageType.value;
+    }).mimeType;
+
+    canvas.value.toBlob((blob) => {
+      expectImageSize.value = blob.size;
+    }, getImageMimeType, downloadImageQuality.value / 100);
+  }
 };
 
 onUnmounted(() => {
@@ -300,22 +316,27 @@ onUnmounted(() => {
         </div>
         <div class="final-block">
           Download image type:
+          <p>(Possibly download .png file because of not supported by certain browsers.)</p>
           <div class="tools">
             <div class="image-type">
               <template v-for="(imageType, key) in imageTypes" :key="key">
                 <input type="radio" name="imageType" :id="imageType.name" :value="imageType.name"
-                       v-model="downloadImageType" :checked="key === 0">
+                       v-model="downloadImageType" :checked="key === 0" @change="imageTypeChangeEvent">
                 <label class="text" :for="imageType.name">{{ imageType.name.toUpperCase() }}</label>
               </template>
             </div>
           </div>
           <template v-if="downloadImageType === 'jpg'">
-            select image quantity:
+            Select image quality:
             <div class="tools">
-              <RangeSlider :value="downloadImageQuantity" :min="10" :max="100" :step="10"
-                           @slideRange="slideImageQuantity"/>
+              <RangeSlider :value="downloadImageQuality" :min="10" :max="100" :step="10"
+                           @slideRange="slideImageQuality"/>
             </div>
           </template>
+          Expect size:
+          <span v-if="expectImageSize !== null">{{
+              Math.round((expectImageSize / 1024) * 100) / 100
+            }} MB ({{ expectImageSize }} Bytes)</span>
         </div>
         <button ref="download" name="download" class="download" @click="downloadImage" disabled>
           Download
