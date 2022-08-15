@@ -26,7 +26,7 @@ const toggleCheckbox = () => {
 </script>
 
 <template>
-  <input type="checkbox" ref="checkbox" v-model="props.isChecked"/>
+  <input type="checkbox" ref="checkbox" :checked="props.isChecked"/>
   <label class="switchToggle" @click="toggleCheckbox"> </label>
 </template>
 
