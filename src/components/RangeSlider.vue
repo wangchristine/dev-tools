@@ -29,11 +29,9 @@ const props = defineProps({
 });
 const emit = defineEmits(["slideRange"]);
 
-let sliderValue = ref(props.value);
 const slideRangeInputEvent = (e) => {
   if (!props.disable) {
-    sliderValue.value = parseInt(e.target.value);
-    emit("slideRange", sliderValue.value);
+    emit("slideRange", parseInt(e.target.value));
   }
 };
 </script>

@@ -25,6 +25,9 @@
       <div class="log">
         <ul>
           <li>
+            [Aug 9, 2022] Image Editor can add watermark.
+          </li>
+          <li>
             [Aug 7, 2022] Image Editor feature go live.
           </li>
           <li>
