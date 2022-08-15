@@ -44,23 +44,23 @@ const renderResult = (userInput) => {
   try {
     if (isQuotationChecked.value) {
       if (
-        userInput.length >= 2 &&
-        userInput.slice(0, 1) === '"' &&
-        userInput.slice(userInput.length - 1) === '"'
+          userInput.length >= 2 &&
+          userInput.slice(0, 1) === '"' &&
+          userInput.slice(userInput.length - 1) === '"'
       ) {
         if (
-          userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"') !== ""
+            userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"') !== ""
         ) {
           if (isUnicodeChecked.value) {
             jsonObj.value = JSON.parse(
-              userInput
-                .slice(1, userInput.length - 1)
-                .replaceAll('\\"', '"')
-                .replaceAll(/\\\\u/g, "\\u")
+                userInput
+                    .slice(1, userInput.length - 1)
+                    .replaceAll('\\"', '"')
+                    .replaceAll(/\\\\u/g, "\\u")
             );
           } else {
             jsonObj.value = JSON.parse(
-              userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"')
+                userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"')
             );
           }
         } else {
@@ -79,7 +79,7 @@ const renderResult = (userInput) => {
           jsonObj.value = JSON.parse(userInput.replaceAll(/\\\\u/g, "\\u"));
         } else {
           jsonObj.value = JSON.parse(
-            userInput.replaceAll(/(?<=[^\\])\\u/g, "\\\\u")
+              userInput.replaceAll(/(?<=[^\\])\\u/g, "\\\\u")
           );
         }
       }
@@ -123,9 +123,9 @@ onUnmounted(() => {
 const handleMousemove = (e) => {
   if (isDragging.value) {
     userBlock.value.style.width =
-      userBlockWidth.value + (e.clientX - lastMouseX.value) + "px";
+        userBlockWidth.value + (e.clientX - lastMouseX.value) + "px";
     resultBlock.value.style.width =
-      resultBlockWidth.value - (e.clientX - lastMouseX.value) + "px";
+        resultBlockWidth.value - (e.clientX - lastMouseX.value) + "px";
   }
 };
 
@@ -142,39 +142,39 @@ const handleMouseup = () => {
         <div class="radio-block">
           In quotes("")?
           <!-- Wrap by quotation("")? -->
-          <SwitchCheckbox v-on:switchChecked="switchInQuotes" />
+          <SwitchCheckbox :isChecked="isQuotationChecked" v-on:switchChecked="switchInQuotes"/>
         </div>
       </div>
       <textarea
-        v-focus
-        name="userInput"
-        class="user-json"
-        placeholder="Type here to convert to json tree..."
-        v-model.trim="jsonString"
+          v-focus
+          name="userInput"
+          class="user-json"
+          placeholder="Type here to convert to json tree..."
+          v-model.trim="jsonString"
       ></textarea>
     </div>
     <div class="result-block" id="result-block" ref="resultBlock">
       <div
-        class="drag-block"
-        id="drag-block"
-        @mousedown="handleMouseDown"
+          class="drag-block"
+          id="drag-block"
+          @mousedown="handleMouseDown"
       ></div>
 
       <div class="block-title">
         Result
         <div class="radio-block">
           Parse Unicode?
-          <SwitchCheckbox v-on:switchChecked="switchUnicode" />
+          <SwitchCheckbox :isChecked="isUnicodeChecked" v-on:switchChecked="switchUnicode"/>
         </div>
       </div>
       <CopiedBlock
-        :content="jsonObj !== undefined ? jsonObj : errorMessage"
-        :type="jsonObj !== undefined ? 'json' : 'string'"
+          :content="jsonObj !== undefined ? jsonObj : errorMessage"
+          :type="jsonObj !== undefined ? 'json' : 'string'"
       >
         <JsonTree
-          v-if="jsonObj !== undefined"
-          :json="jsonObj"
-          :transUnicode="isUnicodeChecked"
+            v-if="jsonObj !== undefined"
+            :json="jsonObj"
+            :transUnicode="isUnicodeChecked"
         />
         <p v-else class="error-message">{{ errorMessage }}</p>
       </CopiedBlock>

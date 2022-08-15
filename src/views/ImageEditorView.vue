@@ -230,6 +230,26 @@ const setExpectImageSize = () => {
     }, getImageMimeType, downloadImageQuality.value / 100);
   }
 };
+const resetImage = () => {
+  URL.revokeObjectURL(image.value.src);
+
+  imageOrigin.value = null;
+  image.value = null;
+  needResize.value = false;
+  resizeType.value = "percent";
+  resizeWidth.value = 100;
+  resizeHeight.value = 100;
+  needWatermark.value = false;
+  watermarkText.value = "@Chris Wang🌱";
+  watermarkSize.value = 30;
+  expectImageSize.value = null;
+  resize.value.disabled = true;
+  inputWidth.value.disabled = true;
+  inputHeight.value.disabled = true;
+  watermark.value.disabled = true;
+  inputWatermarkText.value.disabled = true;
+  download.value.disabled = true;
+}
 
 onUnmounted(() => {
   if (image.value) {
@@ -254,6 +274,7 @@ onUnmounted(() => {
       </label>
       <div class="preview-block" v-else>
         <canvas ref="canvas" id="canvas" class="preview-image" width="800" height="500"></canvas>
+        <span class="reset-image" @click="resetImage">❌</span>
       </div>
     </div>
     <div class="information-block">
@@ -279,12 +300,13 @@ onUnmounted(() => {
       <div class="draw-tool">
         <div class="title">Tools</div>
         <div class="resize">
-          <input type="checkbox" ref="resize" id="resize" @change="switchResize" disabled/>
+          <input type="checkbox" ref="resize" id="resize" :checked="needResize" @change="switchResize" disabled/>
           <label for="resize"> Resize</label>
           <div class="tools">
             <div>
               Type:
-              <SwitchCheckbox :disable="image === null || needResize === false" v-on:switchChecked="switchResizeType"/>
+              <SwitchCheckbox :isChecked="resizeType === 'percent'? false : true"
+                              :disable="image === null || needResize === false" v-on:switchChecked="switchResizeType"/>
               <span v-if="resizeType === 'percent'"> Percent(%)</span>
               <span v-if="resizeType === 'pixel'"> Pixel(px)</span>
             </div>
@@ -299,7 +321,8 @@ onUnmounted(() => {
           </div>
         </div>
         <div class="watermark">
-          <input type="checkbox" ref="watermark" id="watermark" @change="switchWatermark" disabled/>
+          <input type="checkbox" ref="watermark" id="watermark" :checked="needWatermark" @change="switchWatermark"
+                 disabled/>
           <label for="watermark"> Watermark</label>
           <div class="tools">
             <div>
@@ -403,6 +426,14 @@ onUnmounted(() => {
   margin-top: 10px;
   width: 100%;
   height: 500px;
+}
+
+.preview-block .reset-image {
+  position: absolute;
+  top: 0px;
+  right: 5px;
+  font-size: 28px;
+  cursor: pointer;
 }
 
 .information-block {
