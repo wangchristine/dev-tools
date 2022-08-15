@@ -41,6 +41,7 @@ const renderCanvas = ({ canvasWidth, canvasHeight, watermarkText }) => {
     ctx.textAlign = "center";
     ctx.fillText(watermarkText, canvas.value.width / 2, Math.floor(canvas.value.height * (2 / 3)));
   }
+  setExpectImageSize();
 }
 
 const uploadImage = (event) => {
@@ -56,7 +57,6 @@ const uploadImage = (event) => {
       canvas.value.style.maxHeight = "500px";
     }
     renderCanvas({ canvasWidth: img.width, canvasHeight: img.height });
-    setExpectImageSize();
   };
   resize.value.disabled = false;
   watermark.value.disabled = false;
@@ -268,8 +268,6 @@ onUnmounted(() => {
           <div class="icon">📁</div>
           <div class="text">Upload an image file...</div>
         </div>
-
-        <!-- accept="image/png, image/jpeg" -->
         <input type="file" name="userImage" id="userImage" accept="image/*" @change="uploadImage"/>
       </label>
       <div class="preview-block" v-else>
