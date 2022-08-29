@@ -95,9 +95,11 @@ let isDragging = ref(false);
 let lastMouseX = ref(0); // 按下當下 x 位置
 
 // DOM
+const container = ref(null);
 const userBlock = ref(null);
 const resultBlock = ref(null);
 
+let containerWidth = ref(0);
 let userBlockWidth = ref(0);
 let resultBlockWidth = ref(0);
 
@@ -112,8 +114,15 @@ const handleMouseDown = (e) => {
 };
 
 onMounted(() => {
+  containerWidth.value = container.value.clientWidth;
   window.addEventListener("mousemove", handleMousemove);
   window.addEventListener("mouseup", handleMouseup);
+  window.addEventListener('resize', (e) => {
+    let resizeDiff = container.value.clientWidth - containerWidth.value;
+    userBlock.value.style.width = (userBlock.value.clientWidth + Math.floor(resizeDiff / 2)) + "px";
+    resultBlock.value.style.width = (container.value.clientWidth - userBlock.value.clientWidth - 2) + "px";
+    containerWidth.value = container.value.clientWidth;
+  });
 });
 onUnmounted(() => {
   window.removeEventListener("mousemove", handleMousemove);
@@ -135,7 +144,7 @@ const handleMouseup = () => {
 </script>
 
 <template>
-  <div class="container">
+  <div class="container" ref="container">
     <div class="user-block" id="user-block" ref="userBlock">
       <div class="block-title">
         Input
