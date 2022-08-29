@@ -117,7 +117,7 @@ onMounted(() => {
   containerWidth.value = container.value.clientWidth;
   window.addEventListener("mousemove", handleMousemove);
   window.addEventListener("mouseup", handleMouseup);
-  window.addEventListener('resize', (e) => {
+  window.addEventListener('resize', () => {
     let resizeDiff = container.value.clientWidth - containerWidth.value;
     userBlock.value.style.width = (userBlock.value.clientWidth + Math.floor(resizeDiff / 2)) + "px";
     resultBlock.value.style.width = (container.value.clientWidth - userBlock.value.clientWidth - 2) + "px";
