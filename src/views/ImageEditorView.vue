@@ -268,7 +268,7 @@ onUnmounted(() => {
           <div class="icon">📁</div>
           <div class="text">Upload an image file...</div>
         </div>
-        <input type="file" name="userImage" id="userImage" accept="image/*" @change="uploadImage"/>
+        <input type="file" name="userImage" id="userImage" accept="image/*" @change="uploadImage" />
       </label>
       <div class="preview-block" v-else>
         <canvas ref="canvas" id="canvas" class="preview-image" width="800" height="500"></canvas>
@@ -298,40 +298,40 @@ onUnmounted(() => {
       <div class="draw-tool">
         <div class="title">Tools</div>
         <div class="resize">
-          <input type="checkbox" ref="resize" id="resize" :checked="needResize" @change="switchResize" disabled/>
+          <input type="checkbox" ref="resize" id="resize" :checked="needResize" @change="switchResize" disabled />
           <label for="resize"> Resize</label>
           <div class="tools">
             <div>
               Type:
               <SwitchCheckbox :isChecked="resizeType === 'percent'? false : true"
-                              :disable="image === null || needResize === false" v-on:switchChecked="switchResizeType"/>
+                              :disable="image === null || needResize === false" v-on:switchChecked="switchResizeType" />
               <span v-if="resizeType === 'percent'"> Percent(%)</span>
               <span v-if="resizeType === 'pixel'"> Pixel(px)</span>
             </div>
             <div>
               Width:
               <input type="number" v-model.number="resizeWidth" ref="inputWidth" min="1" step="1"
-                     :onkeypress="limitInputNumber" @input="inputWidthInputEvent" disabled/>
+                     :onkeypress="limitInputNumber" @input="inputWidthInputEvent" disabled />
               Height:
               <input type="number" v-model.number="resizeHeight" ref="inputHeight" min="1" step="1"
-                     :onkeypress="limitInputNumber" @input="inputHeightInputEvent" disabled/>
+                     :onkeypress="limitInputNumber" @input="inputHeightInputEvent" disabled />
             </div>
           </div>
         </div>
         <div class="watermark">
           <input type="checkbox" ref="watermark" id="watermark" :checked="needWatermark" @change="switchWatermark"
-                 disabled/>
+                 disabled />
           <label for="watermark"> Watermark</label>
           <div class="tools">
             <div>
               Text:
               <input type="text" v-model.trim="watermarkText" ref="inputWatermarkText"
-                     @input="inputWatermarkTextInputEvent" disabled/>
+                     @input="inputWatermarkTextInputEvent" disabled />
             </div>
             <div>
               Size:
               <RangeSlider :value="watermarkSize" :min="12" :max="72"
-                           :disable="image === null || needWatermark === false" @slideRange="slideWatermarkSize"/>
+                           :disable="image === null || needWatermark === false" @slideRange="slideWatermarkSize" />
             </div>
           </div>
         </div>
@@ -351,7 +351,7 @@ onUnmounted(() => {
             Select image quality:
             <div class="tools">
               <RangeSlider :value="downloadImageQuality" :min="10" :max="100" :step="10"
-                           @slideRange="slideImageQuality"/>
+                           @slideRange="slideImageQuality" />
             </div>
           </template>
           Expect size:
@@ -371,7 +371,6 @@ onUnmounted(() => {
 .container {
   display: flex;
   justify-content: space-around;
-  height: 100%;
 }
 
 .image-block {
@@ -534,5 +533,25 @@ onUnmounted(() => {
 
 .final-block .slider {
   max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-wrap: wrap;
+  }
+
+  .image-block {
+    width: 100%;
+  }
+
+  .upload-file .upload-block {
+    padding: 120px 40px;
+  }
+
+  .information-block {
+    width: 100%;
+    margin: 0;
+    padding-bottom: 20px;
+  }
 }
 </style>

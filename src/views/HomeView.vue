@@ -25,6 +25,9 @@
       <div class="log">
         <ul>
           <li>
+            [Sep 6, 2022] Dev Tools website add RWD.
+          </li>
+          <li>
             [Aug 9, 2022] Image Editor can add watermark.
           </li>
           <li>
