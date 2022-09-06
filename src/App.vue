@@ -1,7 +1,8 @@
 <script setup>
-import { ref, onMounted } from "vue";
-import { RouterLink, RouterView } from "vue-router";
+import { ref, onMounted, watch } from "vue";
+import { RouterLink, RouterView, useRoute } from "vue-router";
 
+const route = useRoute();
 let themeIcon = ref("");
 onMounted(() => {
   if (localStorage.getItem("theme") === "dark") {
@@ -10,7 +11,9 @@ onMounted(() => {
     setTheme("light");
   }
 });
-
+watch(() => route.name, () => {
+  toolLink.value.style.display = "";
+});
 const switchTheme = () => {
   if (localStorage.getItem("theme") === "dark") {
     setTheme("light");
@@ -43,9 +46,7 @@ const toggleBurger = () => {
 
 <template>
   <header>
-    <RouterLink class="brand-title" :to="{ name: 'home' }"
-      >Dev Tools</RouterLink
-    >
+    <RouterLink class="brand-title" :to="{ name: 'home' }">Dev Tools</RouterLink>
     <nav class="tool-link" ref="toolLink">
       <RouterLink :to="{ name: 'home' }">Home</RouterLink>
       <RouterLink :to="{ name: 'json' }">Json Parser</RouterLink>
