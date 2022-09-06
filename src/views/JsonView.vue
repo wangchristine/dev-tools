@@ -44,24 +44,13 @@ const renderResult = (userInput) => {
   try {
     if (isQuotationChecked.value) {
       if (
-          userInput.length >= 2 &&
-          userInput.slice(0, 1) === '"' &&
-          userInput.slice(userInput.length - 1) === '"'
-      ) {
-        if (
-            userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"') !== ""
-        ) {
+        userInput.length >= 2 && userInput.slice(0, 1) === '"' && userInput.slice(userInput.length - 1) === '"') {
+        if (userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"') !== "") {
           if (isUnicodeChecked.value) {
             jsonObj.value = JSON.parse(
-                userInput
-                    .slice(1, userInput.length - 1)
-                    .replaceAll('\\"', '"')
-                    .replaceAll(/\\\\u/g, "\\u")
-            );
+              userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"').replaceAll(/\\\\u/g, "\\u"));
           } else {
-            jsonObj.value = JSON.parse(
-                userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"')
-            );
+            jsonObj.value = JSON.parse(userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"'));
           }
         } else {
           jsonObj.value = undefined;
@@ -79,7 +68,7 @@ const renderResult = (userInput) => {
           jsonObj.value = JSON.parse(userInput.replaceAll(/\\\\u/g, "\\u"));
         } else {
           jsonObj.value = JSON.parse(
-              userInput.replaceAll(/(?<=[^\\])\\u/g, "\\\\u")
+            userInput.replaceAll(/(?<=[^\\])\\u/g, "\\\\u")
           );
         }
       }
@@ -128,9 +117,9 @@ onUnmounted(() => {
 const handleMousemove = (e) => {
   if (isDragging.value) {
     userBlock.value.style.width =
-        userBlockWidth.value + (e.clientX - lastMouseX.value) + "px";
+      userBlockWidth.value + (e.clientX - lastMouseX.value) + "px";
     resultBlock.value.style.width =
-        resultBlockWidth.value - (e.clientX - lastMouseX.value) + "px";
+      resultBlockWidth.value - (e.clientX - lastMouseX.value) + "px";
   }
 };
 
@@ -139,10 +128,15 @@ const handleMouseup = () => {
 };
 
 const handleResize = () => {
-  let resizeDiff = container.value.clientWidth - containerWidth.value;
-  userBlock.value.style.width = (userBlock.value.clientWidth + Math.floor(resizeDiff / 2)) + "px";
-  resultBlock.value.style.width = (container.value.clientWidth - userBlock.value.clientWidth - 2) + "px";
-  containerWidth.value = container.value.clientWidth;
+  if (window.innerWidth >= 768) {
+    let resizeDiff = container.value.clientWidth - containerWidth.value;
+    userBlock.value.style.width = (userBlock.value.clientWidth + Math.floor(resizeDiff / 2)) + "px";
+    resultBlock.value.style.width = (container.value.clientWidth - userBlock.value.clientWidth - 2) + "px";
+    containerWidth.value = container.value.clientWidth;
+  } else {
+    userBlock.value.style.width = "100%";
+    resultBlock.value.style.width = "100%";
+  }
 }
 </script>
 
@@ -157,20 +151,11 @@ const handleResize = () => {
           <SwitchCheckbox :isChecked="isQuotationChecked" v-on:switchChecked="switchInQuotes" />
         </div>
       </div>
-      <textarea
-          v-focus
-          name="userInput"
-          class="user-json"
-          placeholder="Type here to convert to json tree..."
-          v-model.trim="jsonString"
-      ></textarea>
+      <textarea v-focus name="userInput" class="user-json" placeholder="Type here to convert to json tree..."
+                v-model.trim="jsonString"></textarea>
     </div>
     <div class="result-block" id="result-block" ref="resultBlock">
-      <div
-          class="drag-block"
-          id="drag-block"
-          @mousedown="handleMouseDown"
-      ></div>
+      <div class="drag-block" id="drag-block" @mousedown="handleMouseDown"></div>
 
       <div class="block-title">
         Result
@@ -179,15 +164,9 @@ const handleResize = () => {
           <SwitchCheckbox :isChecked="isUnicodeChecked" v-on:switchChecked="switchUnicode" />
         </div>
       </div>
-      <CopiedBlock
-          :content="jsonObj !== undefined ? jsonObj : errorMessage"
-          :type="jsonObj !== undefined ? 'json' : 'string'"
-      >
-        <JsonTree
-            v-if="jsonObj !== undefined"
-            :json="jsonObj"
-            :transUnicode="isUnicodeChecked"
-        />
+      <CopiedBlock :content="jsonObj !== undefined ? jsonObj : errorMessage"
+                   :type="jsonObj !== undefined ? 'json' : 'string'">
+        <JsonTree v-if="jsonObj !== undefined" :json="jsonObj" :transUnicode="isUnicodeChecked" />
         <p v-else class="error-message">{{ errorMessage }}</p>
       </CopiedBlock>
     </div>
@@ -242,6 +221,7 @@ const handleResize = () => {
   border: black 1px solid;
   width: 100%;
   height: calc(100% - 60px);
+  min-height: 100px;
   overflow-y: scroll;
   resize: none;
   font-size: 16px;
@@ -267,5 +247,34 @@ const handleResize = () => {
 .error-message {
   color: #d02451;
   font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .container {
+    justify-content: flex-start;
+    flex-direction: column;
+  }
+
+  .user-block {
+    width: 100%;
+  }
+
+  .user-json {
+    height: 400px;
+  }
+
+  .drag-block {
+    display: none;
+  }
+
+  .result-block {
+    width: 100%;
+    margin-top: 20px;
+    padding-bottom: 30px;
+  }
+
+  .result-div {
+    height: 400px;
+  }
 }
 </style>

@@ -69,7 +69,9 @@ onUnmounted(() => {
   border: black 1px solid;
   height: calc(100% - 60px);
   background-color: var(--color-block-background1);
+  min-height: 100px;
 }
+
 .result-content {
   position: absolute;
   padding: 10px 10px 10px 20px;
@@ -77,6 +79,7 @@ onUnmounted(() => {
   height: 100%;
   overflow-y: scroll;
 }
+
 .copy {
   position: absolute;
   top: 0;
@@ -90,6 +93,7 @@ onUnmounted(() => {
   z-index: 2;
   opacity: 0.5;
 }
+
 .result-div:hover > .copy {
   opacity: 1;
 }

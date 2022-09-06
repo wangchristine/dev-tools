@@ -206,6 +206,7 @@ watch(userString, (userInput) => {
   border: black 1px solid;
   width: 100%;
   height: calc(100% - 52px);
+  min-height: 100px;
   overflow-y: scroll;
   resize: none;
   font-size: 16px;
@@ -231,5 +232,26 @@ watch(userString, (userInput) => {
 .error-message {
   color: #d02451;
   font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .container {
+    flex-wrap: wrap;
+  }
+
+  .select-block {
+    margin: 0;
+    width: 90%;
+    text-align: center;
+  }
+
+  .user-block {
+    height: 300px;
+  }
+
+  .result-block {
+    height: 300px;
+    padding-bottom: 20px;
+  }
 }
 </style>
