@@ -51,9 +51,7 @@ const uploadImage = (event) => {
   img.src = URL.createObjectURL(imageOrigin.value);
   img.onload = () => {
     image.value = img;
-    if (img.width >= img.height) {
-      canvas.value.style.maxWidth = "100%";
-    } else {
+    if (img.width < img.height) {
       canvas.value.style.maxHeight = "500px";
     }
     renderCanvas({ canvasWidth: img.width, canvasHeight: img.height });
@@ -423,6 +421,9 @@ onUnmounted(() => {
   margin-top: 10px;
   width: 100%;
   height: 500px;
+}
+.preview-block .preview-image {
+  max-width: 100%;
 }
 
 .preview-block .reset-image {
