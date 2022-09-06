@@ -117,16 +117,12 @@ onMounted(() => {
   containerWidth.value = container.value.clientWidth;
   window.addEventListener("mousemove", handleMousemove);
   window.addEventListener("mouseup", handleMouseup);
-  window.addEventListener('resize', () => {
-    let resizeDiff = container.value.clientWidth - containerWidth.value;
-    userBlock.value.style.width = (userBlock.value.clientWidth + Math.floor(resizeDiff / 2)) + "px";
-    resultBlock.value.style.width = (container.value.clientWidth - userBlock.value.clientWidth - 2) + "px";
-    containerWidth.value = container.value.clientWidth;
-  });
+  window.addEventListener('resize', handleResize);
 });
 onUnmounted(() => {
   window.removeEventListener("mousemove", handleMousemove);
   window.removeEventListener("mouseup", handleMouseup);
+  window.removeEventListener("resize", handleResize);
 });
 
 const handleMousemove = (e) => {
@@ -141,6 +137,13 @@ const handleMousemove = (e) => {
 const handleMouseup = () => {
   isDragging.value = false;
 };
+
+const handleResize = () => {
+  let resizeDiff = container.value.clientWidth - containerWidth.value;
+  userBlock.value.style.width = (userBlock.value.clientWidth + Math.floor(resizeDiff / 2)) + "px";
+  resultBlock.value.style.width = (container.value.clientWidth - userBlock.value.clientWidth - 2) + "px";
+  containerWidth.value = container.value.clientWidth;
+}
 </script>
 
 <template>
@@ -151,7 +154,7 @@ const handleMouseup = () => {
         <div class="radio-block">
           In quotes("")?
           <!-- Wrap by quotation("")? -->
-          <SwitchCheckbox :isChecked="isQuotationChecked" v-on:switchChecked="switchInQuotes"/>
+          <SwitchCheckbox :isChecked="isQuotationChecked" v-on:switchChecked="switchInQuotes" />
         </div>
       </div>
       <textarea
@@ -173,7 +176,7 @@ const handleMouseup = () => {
         Result
         <div class="radio-block">
           Parse Unicode?
-          <SwitchCheckbox :isChecked="isUnicodeChecked" v-on:switchChecked="switchUnicode"/>
+          <SwitchCheckbox :isChecked="isUnicodeChecked" v-on:switchChecked="switchUnicode" />
         </div>
       </div>
       <CopiedBlock
