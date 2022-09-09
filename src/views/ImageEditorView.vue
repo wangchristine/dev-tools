@@ -26,7 +26,7 @@ let watermark = ref(null);
 let inputWatermarkText = ref(null);
 let download = ref(null);
 
-const renderCanvas = ({ canvasWidth, canvasHeight, watermarkText }) => {
+const renderCanvas = ({ canvasWidth, canvasHeight }) => {
   let ctx = canvas.value.getContext("2d");
   ctx.clearRect(0, 0, canvas.value.width, canvas.value.height);
 
@@ -35,12 +35,11 @@ const renderCanvas = ({ canvasWidth, canvasHeight, watermarkText }) => {
     canvas.value.height = canvasHeight;
   }
   ctx.drawImage(image.value, 0, 0, image.value.width, image.value.height, 0, 0, canvas.value.width, canvas.value.height);
-
-  if (watermarkText !== undefined) {
+  if (needWatermark.value) {
     ctx.font = `${watermarkSize.value}px Comic Sans MS`;
     ctx.fillStyle = "#da94f1";
     ctx.textAlign = "center";
-    ctx.fillText(watermarkText, canvas.value.width / 2, Math.floor(canvas.value.height * (2 / 3)));
+    ctx.fillText(watermarkText.value, canvas.value.width / 2, Math.floor(canvas.value.height * (2 / 3)));
   }
   setExpectImageSize();
 }
@@ -109,7 +108,7 @@ const rotateImage = (rotateDeg) => {
   ctx.drawImage(image.value, 0, 0, image.value.width, image.value.height, drawX, drawY, image.value.width, image.value.height);
   ctx.restore();
 
-  if (watermarkText.value !== undefined) {
+  if (needWatermark.value) {
     ctx.font = `${watermarkSize.value}px Comic Sans MS`;
     ctx.fillStyle = "#da94f1";
     ctx.textAlign = "center";
@@ -144,24 +143,15 @@ const switchResize = () => {
 
       if (resizeType.value === "percent") {
         const rate = resizeWidth.value / 100;
-        renderCanvas({
-          canvasWidth: image.value.width * rate,
-          canvasHeight: image.value.height * rate, ...(needWatermark.value && { watermarkText: watermarkText.value })
-        });
+        renderCanvas({ canvasWidth: image.value.width * rate, canvasHeight: image.value.height * rate });
       } else {
         const rate = resizeWidth.value / image.value.width;
-        renderCanvas({
-          canvasWidth: resizeWidth.value,
-          canvasHeight: image.value.height * rate, ...(needWatermark.value && { watermarkText: watermarkText.value })
-        });
+        renderCanvas({ canvasWidth: resizeWidth.value, canvasHeight: image.value.height * rate });
       }
     } else {
       inputWidth.value.disabled = true;
       inputHeight.value.disabled = true;
-      renderCanvas({
-        canvasWidth: image.value.width,
-        canvasHeight: image.value.height, ...(needWatermark.value && { watermarkText: watermarkText.value })
-      });
+      renderCanvas({ canvasWidth: image.value.width, canvasHeight: image.value.height });
     }
   }
 };
@@ -176,10 +166,7 @@ const switchResizeType = (isChecked) => {
       resizeWidth.value = image.value.width;
       resizeHeight.value = image.value.height;
     }
-    renderCanvas({
-      canvasWidth: image.value.width,
-      canvasHeight: image.value.height, ...(needWatermark.value && { watermarkText: watermarkText.value })
-    });
+    renderCanvas({ canvasWidth: image.value.width, canvasHeight: image.value.height });
   }
 };
 
@@ -192,10 +179,7 @@ const inputWidthInputEvent = () => {
     }
     resizeHeight.value = resizeWidth.value;
     const rate = resizeWidth.value / 100;
-    renderCanvas({
-      canvasWidth: image.value.width * rate,
-      canvasHeight: image.value.height * rate, ...(needWatermark.value && { watermarkText: watermarkText.value })
-    });
+    renderCanvas({ canvasWidth: image.value.width * rate, canvasHeight: image.value.height * rate });
   } else {
     if (image.value) {
       if (resizeWidth.value > image.value.width) {
@@ -203,10 +187,7 @@ const inputWidthInputEvent = () => {
       }
       const rate = resizeWidth.value / image.value.width;
       resizeHeight.value = Math.floor(image.value.height * rate);
-      renderCanvas({
-        canvasWidth: resizeWidth.value,
-        canvasHeight: image.value.height * rate, ...(needWatermark.value && { watermarkText: watermarkText.value })
-      });
+      renderCanvas({ canvasWidth: resizeWidth.value, canvasHeight: image.value.height * rate });
     }
   }
 };
@@ -220,10 +201,7 @@ const inputHeightInputEvent = () => {
     }
     resizeWidth.value = resizeHeight.value;
     const rate = (resizeHeight.value / 100);
-    renderCanvas({
-      canvasWidth: image.value.width * rate,
-      canvasHeight: image.value.height * rate, ...(needWatermark.value && { watermarkText: watermarkText.value })
-    });
+    renderCanvas({ canvasWidth: image.value.width * rate, canvasHeight: image.value.height * rate });
   } else {
     if (image.value) {
       if (resizeHeight.value > image.value.height) {
@@ -231,10 +209,7 @@ const inputHeightInputEvent = () => {
       }
       const rate = resizeHeight.value / image.value.height;
       resizeWidth.value = Math.floor(image.value.width * rate);
-      renderCanvas({
-        canvasWidth: image.value.width * rate,
-        canvasHeight: resizeHeight.value, ...(needWatermark.value && { watermarkText: watermarkText.value })
-      });
+      renderCanvas({ canvasWidth: image.value.width * rate, canvasHeight: resizeHeight.value });
     }
   }
 }
@@ -244,7 +219,7 @@ const limitInputNumber = (event) => {
 };
 
 const inputWatermarkTextInputEvent = () => {
-  renderCanvas({ watermarkText: watermarkText.value });
+  renderCanvas({});
 };
 
 const switchWatermark = () => {
@@ -252,7 +227,7 @@ const switchWatermark = () => {
   if (image.value) {
     if (needWatermark.value) {
       inputWatermarkText.value.disabled = false;
-      renderCanvas({ watermarkText: watermarkText.value });
+      renderCanvas({});
     } else {
       inputWatermarkText.value.disabled = true;
       renderCanvas({});
@@ -262,7 +237,7 @@ const switchWatermark = () => {
 
 const slideWatermarkSize = (sliderValue) => {
   watermarkSize.value = sliderValue;
-  renderCanvas({ watermarkText: watermarkText.value });
+  renderCanvas({});
 };
 
 const imageTypeChangeEvent = () => {
@@ -353,7 +328,7 @@ onUnmounted(() => {
           Origin size:
           <span v-if="imageOrigin !== null">{{
               Math.round((imageOrigin.size / 1024) * 100) / 100
-            }} MB ({{ imageOrigin.size }} Bytes)</span>
+            }} KB ({{ imageOrigin.size }} Bytes)</span>
         </p>
         <p>
           Origin resolution:
@@ -422,7 +397,7 @@ onUnmounted(() => {
           Expect size:
           <span v-if="expectImageSize !== null">{{
               Math.round((expectImageSize / 1024) * 100) / 100
-            }} MB ({{ expectImageSize }} Bytes)</span>
+            }} KB ({{ expectImageSize }} Bytes)</span>
         </div>
         <button ref="download" name="download" class="download" @click="downloadImage" disabled>
           Download
