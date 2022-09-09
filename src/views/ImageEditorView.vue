@@ -6,6 +6,7 @@ import imageTypes from "@/config/imageType.json";
 
 let imageOrigin = ref(null);
 let image = ref(null);
+let imageRotate = ref(0);
 let needResize = ref(false);
 let resizeType = ref("percent");
 let resizeWidth = ref(100);
@@ -60,7 +61,63 @@ const uploadImage = (event) => {
   watermark.value.disabled = false;
   download.value.disabled = false;
 };
+const rotateImage = (rotateDeg) => {
+  let ctx = canvas.value.getContext("2d");
+  imageRotate.value = (imageRotate.value + rotateDeg) % 360;
 
+  if (canvas.value.width < canvas.value.height) {
+    canvas.value.style.maxHeight = "";
+  } else {
+    canvas.value.style.maxHeight = "500px";
+  }
+
+  ctx.clearRect(0, 0, canvas.value.width, canvas.value.height);
+
+  let drawX, drawY = 0;
+
+  switch (imageRotate.value) {
+    case 0:
+      canvas.value.width = image.value.width;
+      canvas.value.height = image.value.height;
+      drawX = 0;
+      drawY = 0;
+      break;
+    case 90:
+    case -270:
+      canvas.value.width = image.value.height;
+      canvas.value.height = image.value.width;
+      drawX = 0;
+      drawY = -image.value.height;
+      break;
+    case 180:
+    case -180:
+      canvas.value.width = image.value.width;
+      canvas.value.height = image.value.height;
+      drawX = -image.value.width;
+      drawY = -image.value.height;
+      break;
+    case 270:
+    case -90:
+      canvas.value.width = image.value.height;
+      canvas.value.height = image.value.width;
+      drawX = -image.value.width;
+      drawY = 0;
+      break;
+  }
+  ctx.save();
+  ctx.rotate(imageRotate.value * Math.PI / 180);
+  ctx.drawImage(image.value, 0, 0, image.value.width, image.value.height, drawX, drawY, image.value.width, image.value.height);
+  ctx.restore();
+
+  if (watermarkText.value !== undefined) {
+    ctx.font = `${watermarkSize.value}px Comic Sans MS`;
+    ctx.fillStyle = "#da94f1";
+    ctx.textAlign = "center";
+    ctx.fillText(watermarkText.value, canvas.value.width / 2, Math.floor(canvas.value.height * (2 / 3)));
+  }
+
+  setExpectImageSize();
+};
 const downloadImage = () => {
   const getImageMimeType = imageTypes.find((imageType) => {
     return imageType.name === downloadImageType.value;
@@ -230,9 +287,9 @@ const setExpectImageSize = () => {
 };
 const resetImage = () => {
   URL.revokeObjectURL(image.value.src);
-
   imageOrigin.value = null;
   image.value = null;
+  imageRotate.value = 0;
   needResize.value = false;
   resizeType.value = "percent";
   resizeWidth.value = 100;
@@ -241,6 +298,12 @@ const resetImage = () => {
   watermarkText.value = "@Chris Wang🌱";
   watermarkSize.value = 30;
   expectImageSize.value = null;
+
+  let ctx = canvas.value.getContext("2d");
+  ctx.clearRect(0, 0, canvas.value.width, canvas.value.height);
+  canvas.value.width = "800";
+  canvas.value.height = "500";
+  canvas.value.style.maxHeight = "";
   resize.value.disabled = true;
   inputWidth.value.disabled = true;
   inputHeight.value.disabled = true;
@@ -271,6 +334,10 @@ onUnmounted(() => {
       <div class="preview-block" v-else>
         <canvas ref="canvas" id="canvas" class="preview-image" width="800" height="500"></canvas>
         <span class="reset-image" @click="resetImage">❌</span>
+      </div>
+      <div class="tools-block" v-if="imageOrigin !== null">
+        <button @click="rotateImage(90)">↩ 順時針旋轉 90%</button>
+        <button @click="rotateImage(-90)">↪ 逆時針旋轉 90%</button>
       </div>
     </div>
     <div class="information-block">
@@ -422,6 +489,7 @@ onUnmounted(() => {
   width: 100%;
   height: 500px;
 }
+
 .preview-block .preview-image {
   max-width: 100%;
 }
@@ -431,6 +499,19 @@ onUnmounted(() => {
   top: 0px;
   right: 5px;
   font-size: 28px;
+  cursor: pointer;
+}
+
+.tools-block {
+  text-align: center;
+}
+
+.tools-block button {
+  background-color: #60b699;
+  color: #fff;
+  padding: 10px 20px;
+  border: 0;
+  margin: 0 5px;
   cursor: pointer;
 }
 
