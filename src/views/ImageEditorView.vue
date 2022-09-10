@@ -7,6 +7,8 @@ import imageTypes from "@/config/imageType.json";
 let imageOrigin = ref(null);
 let image = ref(null);
 let imageRotate = ref(0);
+let imageInCanvasWidth = ref(0);
+let imageInCanvasHeight = ref(0);
 let needResize = ref(false);
 let resizeType = ref("percent");
 let resizeWidth = ref(100);
@@ -26,21 +28,59 @@ let watermark = ref(null);
 let inputWatermarkText = ref(null);
 let download = ref(null);
 
-const renderCanvas = ({ canvasWidth, canvasHeight }) => {
+const renderCanvas = () => {
   let ctx = canvas.value.getContext("2d");
+  let drawX = 0, drawY = 0;
   ctx.clearRect(0, 0, canvas.value.width, canvas.value.height);
 
-  if (canvasWidth !== undefined && canvasHeight !== undefined) {
-    canvas.value.width = canvasWidth;
-    canvas.value.height = canvasHeight;
+  switch (imageRotate.value) {
+    case 0:
+      canvas.value.width = imageInCanvasWidth.value;
+      canvas.value.height = imageInCanvasHeight.value;
+      drawX = 0;
+      drawY = 0;
+      break;
+    case 90:
+    case -270:
+      canvas.value.width = imageInCanvasHeight.value;
+      canvas.value.height = imageInCanvasWidth.value;
+      drawX = 0;
+      drawY = -imageInCanvasHeight.value;
+      break;
+    case 180:
+    case -180:
+      canvas.value.width = imageInCanvasWidth.value;
+      canvas.value.height = imageInCanvasHeight.value;
+      drawX = -imageInCanvasWidth.value;
+      drawY = -imageInCanvasHeight.value;
+      break;
+    case 270:
+    case -90:
+      canvas.value.width = imageInCanvasHeight.value;
+      canvas.value.height = imageInCanvasWidth.value;
+      drawX = -imageInCanvasWidth.value;
+      drawY = 0;
+      break;
   }
-  ctx.drawImage(image.value, 0, 0, image.value.width, image.value.height, 0, 0, canvas.value.width, canvas.value.height);
+  ctx.save();
+  ctx.rotate(imageRotate.value * Math.PI / 180);
+
+  if (canvas.value.width >= canvas.value.height) {
+    canvas.value.style.maxHeight = "";
+  } else {
+    canvas.value.style.maxHeight = "500px";
+  }
+
+  ctx.drawImage(image.value, 0, 0, image.value.width, image.value.height, drawX, drawY, imageInCanvasWidth.value, imageInCanvasHeight.value);
+  ctx.restore();
+
   if (needWatermark.value) {
     ctx.font = `${watermarkSize.value}px Comic Sans MS`;
     ctx.fillStyle = "#da94f1";
     ctx.textAlign = "center";
     ctx.fillText(watermarkText.value, canvas.value.width / 2, Math.floor(canvas.value.height * (2 / 3)));
   }
+
   setExpectImageSize();
 }
 
@@ -54,69 +94,20 @@ const uploadImage = (event) => {
     if (img.width < img.height) {
       canvas.value.style.maxHeight = "500px";
     }
-    renderCanvas({ canvasWidth: img.width, canvasHeight: img.height });
+    imageInCanvasWidth.value = img.width;
+    imageInCanvasHeight.value = img.height;
+    renderCanvas();
   };
   resize.value.disabled = false;
   watermark.value.disabled = false;
   download.value.disabled = false;
 };
+
 const rotateImage = (rotateDeg) => {
-  let ctx = canvas.value.getContext("2d");
   imageRotate.value = (imageRotate.value + rotateDeg) % 360;
-
-  if (canvas.value.width < canvas.value.height) {
-    canvas.value.style.maxHeight = "";
-  } else {
-    canvas.value.style.maxHeight = "500px";
-  }
-
-  ctx.clearRect(0, 0, canvas.value.width, canvas.value.height);
-
-  let drawX, drawY = 0;
-
-  switch (imageRotate.value) {
-    case 0:
-      canvas.value.width = image.value.width;
-      canvas.value.height = image.value.height;
-      drawX = 0;
-      drawY = 0;
-      break;
-    case 90:
-    case -270:
-      canvas.value.width = image.value.height;
-      canvas.value.height = image.value.width;
-      drawX = 0;
-      drawY = -image.value.height;
-      break;
-    case 180:
-    case -180:
-      canvas.value.width = image.value.width;
-      canvas.value.height = image.value.height;
-      drawX = -image.value.width;
-      drawY = -image.value.height;
-      break;
-    case 270:
-    case -90:
-      canvas.value.width = image.value.height;
-      canvas.value.height = image.value.width;
-      drawX = -image.value.width;
-      drawY = 0;
-      break;
-  }
-  ctx.save();
-  ctx.rotate(imageRotate.value * Math.PI / 180);
-  ctx.drawImage(image.value, 0, 0, image.value.width, image.value.height, drawX, drawY, image.value.width, image.value.height);
-  ctx.restore();
-
-  if (needWatermark.value) {
-    ctx.font = `${watermarkSize.value}px Comic Sans MS`;
-    ctx.fillStyle = "#da94f1";
-    ctx.textAlign = "center";
-    ctx.fillText(watermarkText.value, canvas.value.width / 2, Math.floor(canvas.value.height * (2 / 3)));
-  }
-
-  setExpectImageSize();
+  renderCanvas();
 };
+
 const downloadImage = () => {
   const getImageMimeType = imageTypes.find((imageType) => {
     return imageType.name === downloadImageType.value;
@@ -143,15 +134,21 @@ const switchResize = () => {
 
       if (resizeType.value === "percent") {
         const rate = resizeWidth.value / 100;
-        renderCanvas({ canvasWidth: image.value.width * rate, canvasHeight: image.value.height * rate });
+        imageInCanvasWidth.value = image.value.width * rate;
+        imageInCanvasHeight.value = image.value.height * rate;
+        renderCanvas();
       } else {
         const rate = resizeWidth.value / image.value.width;
-        renderCanvas({ canvasWidth: resizeWidth.value, canvasHeight: image.value.height * rate });
+        imageInCanvasWidth.value = resizeWidth.value;
+        imageInCanvasHeight.value = image.value.height * rate;
+        renderCanvas();
       }
     } else {
       inputWidth.value.disabled = true;
       inputHeight.value.disabled = true;
-      renderCanvas({ canvasWidth: image.value.width, canvasHeight: image.value.height });
+      imageInCanvasWidth.value = image.value.width;
+      imageInCanvasHeight.value = image.value.height;
+      renderCanvas();
     }
   }
 };
@@ -166,7 +163,9 @@ const switchResizeType = (isChecked) => {
       resizeWidth.value = image.value.width;
       resizeHeight.value = image.value.height;
     }
-    renderCanvas({ canvasWidth: image.value.width, canvasHeight: image.value.height });
+    imageInCanvasWidth.value = image.value.width;
+    imageInCanvasHeight.value = image.value.height;
+    renderCanvas();
   }
 };
 
@@ -179,7 +178,9 @@ const inputWidthInputEvent = () => {
     }
     resizeHeight.value = resizeWidth.value;
     const rate = resizeWidth.value / 100;
-    renderCanvas({ canvasWidth: image.value.width * rate, canvasHeight: image.value.height * rate });
+    imageInCanvasWidth.value = image.value.width * rate;
+    imageInCanvasHeight.value = image.value.height * rate;
+    renderCanvas();
   } else {
     if (image.value) {
       if (resizeWidth.value > image.value.width) {
@@ -187,7 +188,9 @@ const inputWidthInputEvent = () => {
       }
       const rate = resizeWidth.value / image.value.width;
       resizeHeight.value = Math.floor(image.value.height * rate);
-      renderCanvas({ canvasWidth: resizeWidth.value, canvasHeight: image.value.height * rate });
+      imageInCanvasWidth.value = resizeWidth.value;
+      imageInCanvasHeight.value = image.value.height * rate;
+      renderCanvas();
     }
   }
 };
@@ -201,7 +204,9 @@ const inputHeightInputEvent = () => {
     }
     resizeWidth.value = resizeHeight.value;
     const rate = (resizeHeight.value / 100);
-    renderCanvas({ canvasWidth: image.value.width * rate, canvasHeight: image.value.height * rate });
+    imageInCanvasWidth.value = image.value.width * rate;
+    imageInCanvasHeight.value = image.value.height * rate;
+    renderCanvas();
   } else {
     if (image.value) {
       if (resizeHeight.value > image.value.height) {
@@ -209,7 +214,9 @@ const inputHeightInputEvent = () => {
       }
       const rate = resizeHeight.value / image.value.height;
       resizeWidth.value = Math.floor(image.value.width * rate);
-      renderCanvas({ canvasWidth: image.value.width * rate, canvasHeight: resizeHeight.value });
+      imageInCanvasWidth.value = image.value.width * rate;
+      imageInCanvasHeight.value = resizeHeight.value;
+      renderCanvas();
     }
   }
 }
@@ -219,7 +226,7 @@ const limitInputNumber = (event) => {
 };
 
 const inputWatermarkTextInputEvent = () => {
-  renderCanvas({});
+  renderCanvas();
 };
 
 const switchWatermark = () => {
@@ -227,17 +234,17 @@ const switchWatermark = () => {
   if (image.value) {
     if (needWatermark.value) {
       inputWatermarkText.value.disabled = false;
-      renderCanvas({});
+      renderCanvas();
     } else {
       inputWatermarkText.value.disabled = true;
-      renderCanvas({});
+      renderCanvas();
     }
   }
 };
 
 const slideWatermarkSize = (sliderValue) => {
   watermarkSize.value = sliderValue;
-  renderCanvas({});
+  renderCanvas();
 };
 
 const imageTypeChangeEvent = () => {
@@ -265,6 +272,8 @@ const resetImage = () => {
   imageOrigin.value = null;
   image.value = null;
   imageRotate.value = 0;
+  imageInCanvasWidth.value = 0;
+  imageInCanvasHeight.value = 0;
   needResize.value = false;
   resizeType.value = "percent";
   resizeWidth.value = 100;
