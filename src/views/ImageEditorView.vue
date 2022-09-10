@@ -311,7 +311,7 @@ onUnmounted(() => {
         <div class="upload-block">
           <!-- 📂 -->
           <div class="icon">📁</div>
-          <div class="text">Upload an image file...</div>
+          <div class="text">Upload an image file or drag it here...</div>
         </div>
         <input type="file" name="userImage" id="userImage" accept="image/*" @change="uploadImage" />
       </label>
@@ -462,6 +462,10 @@ onUnmounted(() => {
 .upload-file input[type="file"] {
   opacity: 0;
   position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
 }
 
 .preview-block {
