@@ -26,8 +26,14 @@ const switchInQuotes = (isChecked) => {
   } else if (!isChecked && jsonString.value === '""') {
     jsonString.value = "";
   } else {
+    setIsAllOpen(true);
     renderResult(jsonString.value);
   }
+};
+
+let isAllOpen = ref(true);
+const setIsAllOpen = (allOpen) => {
+  isAllOpen.value = allOpen;
 };
 
 let isUnicodeChecked = ref(false);
@@ -37,6 +43,7 @@ const switchUnicode = (isChecked) => {
 };
 
 watch(jsonString, (userInput) => {
+  setIsAllOpen(true);
   renderResult(userInput);
 });
 
@@ -159,6 +166,12 @@ const handleResize = () => {
 
       <div class="block-title">
         Result
+        <button class="all-open-control" data-text="Expand All" @click="setIsAllOpen(true)"
+                :disabled="isAllOpen === true">+
+        </button>
+        <button class="all-open-control" data-text="Collapse All" @click="setIsAllOpen(false)"
+                :disabled="isAllOpen === false">-
+        </button>
         <div class="radio-block">
           Parse Unicode?
           <SwitchCheckbox :isChecked="isUnicodeChecked" v-on:switchChecked="switchUnicode" />
@@ -166,7 +179,8 @@ const handleResize = () => {
       </div>
       <CopiedBlock :content="jsonObj !== undefined ? jsonObj : errorMessage"
                    :type="jsonObj !== undefined ? 'json' : 'string'">
-        <JsonTree v-if="jsonObj !== undefined" :json="jsonObj" :transUnicode="isUnicodeChecked" />
+        <JsonTree v-if="jsonObj !== undefined" :json="jsonObj" :transUnicode="isUnicodeChecked" :isAllOpen="isAllOpen"
+                  @manualOpen="setIsAllOpen(null)" />
         <p v-else class="error-message">{{ errorMessage }}</p>
       </CopiedBlock>
     </div>
@@ -214,6 +228,34 @@ const handleResize = () => {
 
 .block-title .radio-block {
   font-size: 16px;
+}
+
+.all-open-control {
+  position: relative;
+  padding: 2px 8px;
+  font-size: 14px;
+  font-weight: bold;
+  margin-left: 2px;
+}
+
+.all-open-control::before {
+  position: absolute;
+  top: -32px;
+  left: 0;
+  z-index: 1;
+  width: 100px;
+  background-color: var(--color-block-background1);
+  border: 1px solid #888;
+  border-radius: 2px;
+  color: var(--color-text);
+  content: attr(data-text);
+  padding: 6px 10px;
+  border-radius: 5px;
+  display: none;
+}
+
+.all-open-control:hover::before {
+  display: block;
 }
 
 .user-json {
