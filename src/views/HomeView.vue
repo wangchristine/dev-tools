@@ -25,6 +25,10 @@
       <div class="log">
         <ul>
           <li>
+            [Sep 13, 2022] Json Parser can collapse/expand all folders at once.
+            <span class="thanks">(thanks Tommy)</span>
+          </li>
+          <li>
             [Sep 6, 2022] Dev Tools website add RWD.
           </li>
           <li>
