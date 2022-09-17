@@ -4,19 +4,50 @@ import JsonTree from "@/components/JsonTree.vue";
 import SwitchCheckbox from "@/components/SwitchCheckbox.vue";
 import CopiedBlock from "@/components/CopiedBlock.vue";
 
-// example json
-// {"null":null,"boolean":[true,false],"number":[0,2.1,2e8,-123456780123456780,2.1,2e8,-123456780,2.1,2e8,-123456780,2.1,2e8],"string":{"any characters":"abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def abc def","quotation \"":"\\","backslash \\\\":"\\\\","slash \\/":"\\/","backspace \\b":"\\b","form feed \\f":"\\f","new line \\n":"\\n","carriage return \\r":"\\r","tab \\t":"\\t","hexadeci\u006Dal":"\u004A-\u005A"}}
-// ["a", "b", { "c": 1 }]
-// {"a": 1, "b": [2,{"c": ["d"]}]}
-// [{"a": 1, "b": [2,{"c": [{"a": 1, "b": [2,{"c": ["d"]}]}]}]}]
-// example unicode
-// {"payload":{"depCity":"\u81fa\u5317", "body":"{\"data\":{\"flights\":[{\"depAirport\":\"TPE\",\"depCity\":\"\\u81fa\\u5317\",\"arrCity\":\"\\u65b0\\u52a0\\u5761\"}]}}"}}
-// "\"\\u6fb3\\u9580\\u570b\\u969b\\u6a5f\\u5834\""
-// "{\"data\":{\"timetable\":[{\"aircraftModel\":\"A321neo\",\"operatingAirlineCode\":\"JX\",\"depTerminal\":\"1\",\"depCity\":\"\\u81fa\\u5317\",\"depAirportName\":\"\\u81fa\\u7063\\u6843\\u5712\\u570b\\u969b\\u6a5f\\u5834\",\"arrAirport\":\"MFM\",\"arrCity\":\"\\u6fb3\\u9580\",\"arrAirportName\":\"\\u6fb3\\u9580\\u570b\\u969b\\u6a5f\\u5834\",\"duration\":105,\"arrivalDaysDifference\":0}]}}"
-
 const jsonString = ref("");
 const jsonObj = ref();
 let errorMessage = ref("");
+
+const selectExample = (event) => {
+  switch (event.target.value) {
+    // Default
+    case "0":
+      isQuotationChecked.value = false;
+      isUnicodeChecked.value = false;
+      jsonString.value = "";
+      break;
+    case "1":
+      // All types
+      isQuotationChecked.value = false;
+      isUnicodeChecked.value = true;
+      jsonString.value = String.raw`{"null":null,"boolean":[true,false],"number":[0, 1,4.8,2e6,-123],"string":{"any characters":"Dev Tools is very useful. Dev Tools is very useful. Dev Tools is very useful. Dev Tools is very useful. Dev Tools is very useful.","quotation \"":"\\","backslash \\\\":"\\\\","slash \\/":"\\/","backspace \\b":"\\b","form feed \\f":"\\f","new line \\n":"\\n","carriage return \\r":"\\r","tab \\t":"\\t","hexadeci\u006Dal":"\u004A-\u005A"}}`;
+      break;
+    case "2":
+      // GCP log
+      isQuotationChecked.value = false;
+      isUnicodeChecked.value = true;
+      jsonString.value = String.raw`{"logType":"net-info","method":"GET","direction":"OUT","type":"RESPONSE","url":"\/flight\/v2\/flight-status?date=2022-07-31","labels":[],"meta":[],"statusCode":200,"payload":{"time":1658883879,"headers":{"cache-control":["no-cache, private"],"date":["Wed, 27 Jul 2022 01:04:39 GMT"],"content-type":["application\/json"],"access-control-allow-origin":["*"],"access-control-allow-methods":["GET,POST,PUT,DELETE,OPTIONS"],"access-control-allow-headers":["Content-Type, X-Auth-Token, Origin"]},"body":"{\"data\":{\"flights\":[{\"depAirport\":\"TPE\",\"depCity\":\"\\u81fa\\u5317\",\"arrCity\":\"\\u65b0\\u52a0\\u5761\"}]}}"}}`;
+      break;
+    case "3":
+      // Multi-level
+      isQuotationChecked.value = false;
+      isUnicodeChecked.value = false;
+      jsonString.value = String.raw`[{"a": 1, "b": [2,{"c": [{"a": 1, "b": [2,{"c": ["d"]}]}]}]}]`;
+      break;
+    case "4":
+      // Json string
+      isQuotationChecked.value = true;
+      isUnicodeChecked.value = true;
+      jsonString.value = String.raw`"{\"data\":{\"timetable\":[{\"aircraftModel\":\"A321neo\",\"operatingAirlineCode\":\"JX\",\"depTerminal\":\"1\",\"depCity\":\"\\u81fa\\u5317\",\"depAirportName\":\"\\u81fa\\u7063\\u6843\\u5712\\u570b\\u969b\\u6a5f\\u5834\",\"arrAirport\":\"MFM\",\"arrCity\":\"\\u6fb3\\u9580\",\"arrAirportName\":\"\\u6fb3\\u9580\\u570b\\u969b\\u6a5f\\u5834\",\"duration\":105,\"arrivalDaysDifference\":0}]}}"`;
+      break;
+    case "5":
+      // Unicode
+      isQuotationChecked.value = true;
+      isUnicodeChecked.value = true;
+      jsonString.value = String.raw`"\"\\u6fb3\\u9580\\u570b\\u969b\\u6a5f\\u5834\""`;
+      break;
+  }
+}
 
 let isQuotationChecked = ref(false);
 const switchInQuotes = (isChecked) => {
@@ -50,8 +81,7 @@ watch(jsonString, (userInput) => {
 const renderResult = (userInput) => {
   try {
     if (isQuotationChecked.value) {
-      if (
-        userInput.length >= 2 && userInput.slice(0, 1) === '"' && userInput.slice(userInput.length - 1) === '"') {
+      if (userInput.length >= 2 && userInput.slice(0, 1) === '"' && userInput.slice(userInput.length - 1) === '"') {
         if (userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"') !== "") {
           if (isUnicodeChecked.value) {
             jsonObj.value = JSON.parse(
@@ -152,6 +182,14 @@ const handleResize = () => {
     <div class="user-block" id="user-block" ref="userBlock">
       <div class="block-title">
         Input
+        <select name="example" class="example" @change="selectExample($event)">
+          <option value="0" selected>Examples..</option>
+          <option value="1">Data types</option>
+          <option value="2">GCP log</option>
+          <option value="3">Multi-level</option>
+          <option value="4">Json string</option>
+          <option value="5">Unicode</option>
+        </select>
         <div class="radio-block">
           In quotes("")?
           <!-- Wrap by quotation("")? -->
@@ -196,7 +234,7 @@ const handleResize = () => {
 
 .user-block {
   width: 45%;
-  min-width: 160px;
+  min-width: 170px;
 }
 
 .result-block {
@@ -224,6 +262,10 @@ const handleResize = () => {
   font-size: 20px;
   text-align: center;
   height: 60px;
+}
+
+.block-title .example {
+  padding: 2px 0;
 }
 
 .block-title .radio-block {
