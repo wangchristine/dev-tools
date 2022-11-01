@@ -25,6 +25,10 @@
       <div class="log">
         <ul>
           <li>
+            [Nov 1, 2022] Switch light/dark color theme button changing icon because of UIUX.
+            <span class="thanks">(thanks Tim)</span>
+          </li>
+          <li>
             [Sep 13, 2022] Json Parser can collapse/expand all folders at once.
             <span class="thanks">(thanks Tommy)</span>
           </li>

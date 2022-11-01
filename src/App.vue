@@ -26,11 +26,11 @@ const setTheme = (theme) => {
   if (theme == "dark") {
     document.documentElement.className = "dark";
     localStorage.setItem("theme", "dark");
-    themeIcon.value = "🌙";
+    themeIcon.value = "🌞";
   } else {
     document.documentElement.className = "";
     localStorage.setItem("theme", "light");
-    themeIcon.value = "🌞";
+    themeIcon.value = "🌙";
   }
 };
 
