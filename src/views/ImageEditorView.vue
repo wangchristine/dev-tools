@@ -109,20 +109,31 @@ const rotateImage = (rotateDeg) => {
 };
 
 const downloadImage = () => {
-  const getImageMimeType = imageTypes.find((imageType) => {
-    return imageType.name === downloadImageType.value;
-  }).mimeType;
+  const getImageMimeType = downloadImageType.value === "base64" ?
+    imageOrigin.value.type :
+    imageTypes.find((imageType) => {
+      return imageType.name === downloadImageType.value;
+    }).mimeType;
 
-  canvas.value.toBlob((blob) => {
+  if (downloadImageType.value !== "base64") {
+    canvas.value.toBlob((blob) => {
+      const downloadLink = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      downloadLink.href = url;
+      downloadLink.download = `Dev-Tools_${imageOrigin.value.name.slice(0, imageOrigin.value.name.lastIndexOf("."))}.${downloadImageType.value}`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      URL.revokeObjectURL(url);
+    }, getImageMimeType, downloadImageQuality.value / 100);
+  } else {
     const downloadLink = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    downloadLink.href = url;
-    downloadLink.download = `Dev-Tools_${imageOrigin.value.name.slice(0, imageOrigin.value.name.lastIndexOf("."))}.${downloadImageType.value}`;
+    downloadLink.href = 'data:text/plain;charset=UTF-8,' + '' + canvas.value.toDataURL(getImageMimeType, downloadImageQuality.value / 100);
+    downloadLink.download = `Dev-Tools_${imageOrigin.value.name.slice(0, imageOrigin.value.name.lastIndexOf("."))}.txt`;
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
-    URL.revokeObjectURL(url);
-  }, getImageMimeType, downloadImageQuality.value / 100);
+  }
 };
 
 const switchResize = () => {
@@ -258,10 +269,10 @@ const slideImageQuality = (sliderValue) => {
 
 const setExpectImageSize = () => {
   if (image.value) {
-    const getImageMimeType = imageTypes.find((imageType) => {
-      return imageType.name === downloadImageType.value;
-    }).mimeType;
-
+    const getImageMimeType = downloadImageType.value === "base64" ?
+      imageOrigin.value.type : imageTypes.find((imageType) => {
+        return imageType.name === downloadImageType.value;
+      }).mimeType;
     canvas.value.toBlob((blob) => {
       expectImageSize.value = blob.size;
     }, getImageMimeType, downloadImageQuality.value / 100);
@@ -385,7 +396,7 @@ onUnmounted(() => {
           </div>
         </div>
         <div class="final-block">
-          Download image type:
+          Download type:
           <p>(Possibly download .png file because of not supported by certain browsers.)</p>
           <div class="tools">
             <div class="image-type">
@@ -394,9 +405,14 @@ onUnmounted(() => {
                        v-model="downloadImageType" :checked="key === 0" @change="imageTypeChangeEvent">
                 <label class="text" :for="imageType.name">{{ imageType.name.toUpperCase() }}</label>
               </template>
+              <span class="divider"></span>
+              <input type="radio" name="imageType" id="base64" value="base64"
+                     v-model="downloadImageType" @change="imageTypeChangeEvent">
+              <label class="text" for="base64">BASE64 FILE</label>
             </div>
           </div>
-          <template v-if="downloadImageType === 'jpg'">
+          <template
+            v-if="downloadImageType === 'jpg' || (imageOrigin !== null && downloadImageType === 'base64' && imageOrigin.type === 'image/jpeg')">
             Select image quality:
             <div class="tools">
               <RangeSlider :value="downloadImageQuality" :min="10" :max="100" :step="10"
@@ -578,10 +594,6 @@ onUnmounted(() => {
   border-top: 1px solid;
 }
 
-.image-type {
-  margin: 10px 0;
-}
-
 .image-type input[type=radio] {
   display: none;
   opacity: 0;
@@ -590,15 +602,22 @@ onUnmounted(() => {
 }
 
 .image-type .text {
+  display: inline-block;
   cursor: pointer;
   background-color: #b5b5b5;
-  margin: 0 5px;
+  margin: 0 5px 10px 5px;
   padding: 4px 12px;
 }
 
 .image-type input[type=radio]:checked + .text {
   background-color: #60b699;
   color: #fff;
+}
+
+.image-type .divider {
+  border-left: 1px solid var(--color-text);
+  margin: 0px 7px;
+  padding: 4px 0;
 }
 
 .final-block .slider {
@@ -622,6 +641,10 @@ onUnmounted(() => {
     width: 100%;
     margin: 0;
     padding-bottom: 20px;
+  }
+
+  .draw-tool .tools {
+    padding-left: 0;
   }
 }
 </style>
