@@ -19,6 +19,7 @@ let watermarkSize = ref(30);
 let downloadImageType = ref("jpg");
 let downloadImageQuality = ref(90);
 let expectImageSize = ref(null);
+let uploadError = ref(null);
 // dom
 let canvas = ref(null);
 let resize = ref(null);
@@ -97,12 +98,19 @@ const uploadImage = (event) => {
     imageInCanvasWidth.value = img.width;
     imageInCanvasHeight.value = img.height;
     renderCanvas();
-  };
-  resize.value.disabled = false;
-  watermark.value.disabled = false;
-  download.value.disabled = false;
-};
 
+    uploadError.value = false;
+    resize.value.disabled = false;
+    watermark.value.disabled = false;
+    download.value.disabled = false;
+  };
+  img.onerror = () => {
+    image.value = null;
+    resetImage();
+    uploadError.value = true;
+  };
+
+};
 const rotateImage = (rotateDeg) => {
   imageRotate.value = (imageRotate.value + rotateDeg) % 360;
   renderCanvas();
@@ -279,7 +287,9 @@ const setExpectImageSize = () => {
   }
 };
 const resetImage = () => {
-  URL.revokeObjectURL(image.value.src);
+  if (image.value) {
+    URL.revokeObjectURL(image.value.src);
+  }
   imageOrigin.value = null;
   image.value = null;
   imageRotate.value = 0;
@@ -293,12 +303,14 @@ const resetImage = () => {
   watermarkText.value = "@Chris Wang🌱";
   watermarkSize.value = 30;
   expectImageSize.value = null;
-
-  let ctx = canvas.value.getContext("2d");
-  ctx.clearRect(0, 0, canvas.value.width, canvas.value.height);
-  canvas.value.width = "800";
-  canvas.value.height = "500";
-  canvas.value.style.maxHeight = "";
+  uploadError.value = null;
+  if (canvas.value) {
+    let ctx = canvas.value.getContext("2d");
+    ctx.clearRect(0, 0, canvas.value.width, canvas.value.height);
+    canvas.value.width = "800";
+    canvas.value.height = "500";
+    canvas.value.style.maxHeight = "";
+  }
   resize.value.disabled = true;
   inputWidth.value.disabled = true;
   inputHeight.value.disabled = true;
@@ -323,6 +335,7 @@ onUnmounted(() => {
           <!-- 📂 -->
           <div class="icon">📁</div>
           <div class="text">Upload an image file or drag it here...</div>
+          <div class="error" v-if="uploadError">Upload Failed. Please upload the correct image file.</div>
         </div>
         <input type="file" name="userImage" id="userImage" accept="image/*" @change="uploadImage" />
       </label>
@@ -330,7 +343,7 @@ onUnmounted(() => {
         <canvas ref="canvas" id="canvas" class="preview-image" width="800" height="500"></canvas>
         <span class="reset-image" @click="resetImage">❌</span>
       </div>
-      <div class="tools-block" v-if="imageOrigin !== null">
+      <div class="tools-block" v-if="imageOrigin !== null && uploadError === false">
         <button @click="rotateImage(90)">↩ 順時針旋轉 90%</button>
         <button @click="rotateImage(-90)">↪ 逆時針旋轉 90%</button>
       </div>
@@ -473,6 +486,11 @@ onUnmounted(() => {
 .upload-block .text {
   padding: 10px 10px 30px 10px;
   font-size: 18px;
+}
+
+.upload-block .error {
+  font-size: 20px;
+  color: #ff6868;
 }
 
 .upload-file input[type="file"] {
