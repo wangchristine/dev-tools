@@ -65,8 +65,7 @@ const renderCanvas = () => {
   }
   ctx.save();
   ctx.rotate(imageRotate.value * Math.PI / 180);
-
-  if (canvas.value.width >= canvas.value.height) {
+  if (canvas.value.height <= 500) {
     canvas.value.style.maxHeight = "";
   } else {
     canvas.value.style.maxHeight = "500px";
@@ -92,7 +91,7 @@ const uploadImage = (event) => {
   img.src = URL.createObjectURL(imageOrigin.value);
   img.onload = () => {
     image.value = img;
-    if (img.width < img.height) {
+    if (img.height > 500) {
       canvas.value.style.maxHeight = "500px";
     }
     imageInCanvasWidth.value = img.width;
