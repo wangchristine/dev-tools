@@ -54,11 +54,15 @@ const toggleBurger = () => {
       <RouterLink :to="{ name: 'image-editor' }">Image Editor</RouterLink>
     </nav>
     <button class="burger" @click="toggleBurger">≡</button>
-    <span class="header-right">
+    <div class="header-right">
+      <a href="https://github.com/wangchristine/dev-tools" target="_blank" class="github-text">Star me at GitHub!🎉</a>
+      <a href="https://github.com/wangchristine/dev-tools" target="_blank" class="github-icon">
+        <img src="@/assets/github.png" alt="github">
+      </a>
       <button name="theme" class="theme" @click="switchTheme">
         {{ themeIcon }}
       </button>
-    </span>
+    </div>
   </header>
 
   <main>
@@ -137,6 +141,30 @@ header .burger {
 
 header .header-right {
   float: right;
+  display: flex;
+}
+
+.github-text {
+  text-decoration: none;
+  padding: 2px 0 2px 6px;
+  margin-right: 20px;
+  background-color: rgb(96, 182, 153);
+  border-radius: 5px;
+  color: rgb(239, 239, 239);
+  display: inline;
+}
+
+.github-icon {
+  display: none;
+  margin-right: 10px;
+}
+
+.github-icon img {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background-color: #fff;
+  padding: 3px;
 }
 
 .theme {
@@ -152,6 +180,16 @@ main {
   padding: 2rem;
   font-size: 16px;
   height: calc(100vh - 60px);
+}
+
+@media (max-width: 830px) {
+  .github-text {
+    display: none;
+  }
+
+  .github-icon {
+    display: inline;
+  }
 }
 
 @media (max-width: 768px) {
