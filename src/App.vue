@@ -156,15 +156,14 @@ header .header-right {
 
 .github-icon {
   display: none;
-  margin-right: 10px;
+  margin-right: 16px;
 }
 
 .github-icon img {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background-color: #fff;
-  padding: 3px;
+  border: 1.5px solid;
 }
 
 .theme {
