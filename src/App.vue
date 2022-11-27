@@ -163,7 +163,10 @@ header .header-right {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1.5px solid;
+  border: 1px solid;
+  padding: 2px;
+  background-color: #fff;
+  color: var(--color-text);
 }
 
 .theme {
