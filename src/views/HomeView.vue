@@ -15,8 +15,8 @@
       <img src="@/assets/avatar.png" class="avatar" alt="My Avatar" />
       <div class="author">Chris Wang</div>
       <div class="experience">
-        <div class="title">Backend Engineer</div>
-        <div class="description">who wants to be a Full Stack Engineer :D</div>
+        <div class="title">Full Stack Engineer</div>
+        <div class="description">who owns a warm indoor garden :D</div>
       </div>
     </div>
     <div class="changeLog">
