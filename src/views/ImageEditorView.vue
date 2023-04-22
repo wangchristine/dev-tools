@@ -6,6 +6,7 @@ import imageTypes from "@/config/imageType.json";
 
 let imagesOrigin = ref(null);
 let images = ref([]);
+let imageSelected = ref(0);
 let imageRotate = ref(0);
 let imageInCanvasWidth = ref(0);
 let imageInCanvasHeight = ref(0);
@@ -71,7 +72,7 @@ const renderCanvas = () => {
     canvas.value.style.maxHeight = "500px";
   }
 
-  ctx.drawImage(images.value[0], 0, 0, images.value[0].width, images.value[0].height, drawX, drawY, imageInCanvasWidth.value, imageInCanvasHeight.value);
+  ctx.drawImage(images.value[imageSelected.value], 0, 0, images.value[imageSelected.value].width, images.value[imageSelected.value].height, drawX, drawY, imageInCanvasWidth.value, imageInCanvasHeight.value);
   ctx.restore();
 
   if (needWatermark.value) {
@@ -134,6 +135,24 @@ const uploadImage = (event) => {
       uploadError.value = true;
     });
 };
+const selectImage = (idx) => {
+  imageSelected.value = idx;
+
+  if (images.value.length !== 0) {
+    if (needResize.value) {
+      if (resizeType.value === "percent") {
+        const rate = resizeWidth.value / 100;
+        imageInCanvasWidth.value = images.value[imageSelected.value].width * rate;
+        imageInCanvasHeight.value = images.value[imageSelected.value].height * rate;
+        renderCanvas();
+      }
+    } else {
+      imageInCanvasWidth.value = images.value[imageSelected.value].width;
+      imageInCanvasHeight.value = images.value[imageSelected.value].height;
+      renderCanvas();
+    }
+  }
+};
 const rotateImage = (rotateDeg) => {
   imageRotate.value = (imageRotate.value + rotateDeg) % 360;
   renderCanvas();
@@ -176,20 +195,20 @@ const switchResize = () => {
 
       if (resizeType.value === "percent") {
         const rate = resizeWidth.value / 100;
-        imageInCanvasWidth.value = images.value[0].width * rate;
-        imageInCanvasHeight.value = images.value[0].height * rate;
+        imageInCanvasWidth.value = images.value[imageSelected.value].width * rate;
+        imageInCanvasHeight.value = images.value[imageSelected.value].height * rate;
         renderCanvas();
       } else {
-        const rate = resizeWidth.value / images.value[0].width;
+        const rate = resizeWidth.value / images.value[imageSelected.value].width;
         imageInCanvasWidth.value = resizeWidth.value;
-        imageInCanvasHeight.value = images.value[0].height * rate;
+        imageInCanvasHeight.value = images.value[imageSelected.value].height * rate;
         renderCanvas();
       }
     } else {
       inputWidth.value.disabled = true;
       inputHeight.value.disabled = true;
-      imageInCanvasWidth.value = images.value[0].width;
-      imageInCanvasHeight.value = images.value[0].height;
+      imageInCanvasWidth.value = images.value[imageSelected.value].width;
+      imageInCanvasHeight.value = images.value[imageSelected.value].height;
       renderCanvas();
     }
   }
@@ -202,11 +221,11 @@ const switchResizeType = (isChecked) => {
       resizeWidth.value = 100;
       resizeHeight.value = 100;
     } else {
-      resizeWidth.value = images.value[0].width;
-      resizeHeight.value = images.value[0].height;
+      resizeWidth.value = images.value[imageSelected.value].width;
+      resizeHeight.value = images.value[imageSelected.value].height;
     }
-    imageInCanvasWidth.value = images.value[0].width;
-    imageInCanvasHeight.value = images.value[0].height;
+    imageInCanvasWidth.value = images.value[imageSelected.value].width;
+    imageInCanvasHeight.value = images.value[imageSelected.value].height;
     renderCanvas();
   }
 };
@@ -220,18 +239,18 @@ const inputWidthInputEvent = () => {
     }
     resizeHeight.value = resizeWidth.value;
     const rate = resizeWidth.value / 100;
-    imageInCanvasWidth.value = images.value[0].width * rate;
-    imageInCanvasHeight.value = images.value[0].height * rate;
+    imageInCanvasWidth.value = images.value[imageSelected.value].width * rate;
+    imageInCanvasHeight.value = images.value[imageSelected.value].height * rate;
     renderCanvas();
   } else {
     if (images.value.length !== 0) {
-      if (resizeWidth.value > images.value[0].width) {
-        resizeWidth.value = images.value[0].width;
+      if (resizeWidth.value > images.value[imageSelected.value].width) {
+        resizeWidth.value = images.value[imageSelected.value].width;
       }
-      const rate = resizeWidth.value / images.value[0].width;
-      resizeHeight.value = Math.floor(images.value[0].height * rate);
+      const rate = resizeWidth.value / images.value[imageSelected.value].width;
+      resizeHeight.value = Math.floor(images.value[imageSelected.value].height * rate);
       imageInCanvasWidth.value = resizeWidth.value;
-      imageInCanvasHeight.value = images.value[0].height * rate;
+      imageInCanvasHeight.value = images.value[imageSelected.value].height * rate;
       renderCanvas();
     }
   }
@@ -246,17 +265,17 @@ const inputHeightInputEvent = () => {
     }
     resizeWidth.value = resizeHeight.value;
     const rate = resizeHeight.value / 100;
-    imageInCanvasWidth.value = images.value[0].width * rate;
-    imageInCanvasHeight.value = images.value[0].height * rate;
+    imageInCanvasWidth.value = images.value[imageSelected.value].width * rate;
+    imageInCanvasHeight.value = images.value[imageSelected.value].height * rate;
     renderCanvas();
   } else {
     if (images.value.length !== 0) {
-      if (resizeHeight.value > images.value[0].height) {
-        resizeHeight.value = images.value[0].height;
+      if (resizeHeight.value > images.value[imageSelected.value].height) {
+        resizeHeight.value = images.value[imageSelected.value].height;
       }
-      const rate = resizeHeight.value / images.value[0].height;
-      resizeWidth.value = Math.floor(images.value[0].width * rate);
-      imageInCanvasWidth.value = images.value[0].width * rate;
+      const rate = resizeHeight.value / images.value[imageSelected.value].height;
+      resizeWidth.value = Math.floor(images.value[imageSelected.value].width * rate);
+      imageInCanvasWidth.value = images.value[imageSelected.value].width * rate;
       imageInCanvasHeight.value = resizeHeight.value;
       renderCanvas();
     }
@@ -301,7 +320,7 @@ const slideImageQuality = (sliderValue) => {
 const setExpectImageSize = () => {
   if (images.value.length !== 0) {
     const getImageMimeType = downloadImageType.value === "base64" ?
-      imagesOrigin.value.item(0).type : imageTypes.find((imageType) => {
+      imagesOrigin.value.item(imageSelected.value).type : imageTypes.find((imageType) => {
         return imageType.name === downloadImageType.value;
       }).mimeType;
     canvas.value.toBlob((blob) => {
@@ -318,6 +337,7 @@ const resetImage = () => {
   }
   imagesOrigin.value = null;
   images.value = [];
+  imageSelected.value = 0;
   imageRotate.value = 0;
   imageInCanvasWidth.value = 0;
   imageInCanvasHeight.value = 0;
@@ -367,14 +387,19 @@ onUnmounted(() => {
             Upload Failed. Please upload the correct image files and maximum number of files is 20.
           </div>
         </div>
-        <input type="file" name="userImage" d="userImage" accept="image/*" @change="uploadImage" multiple/>
+        <input type="file" name="userImage" id="userImage" accept="image/*" @change="uploadImage" multiple />
       </label>
       <div class="preview-block" v-else>
         <canvas ref="canvas" id="canvas" class="preview-image" width="800" height="500"></canvas>
         <span class="reset-image" @click="resetImage">❌</span>
       </div>
-      <div class="multi-preview-block">
-        <!-- <img v-if="image !== null" :src="image.src"> -->
+      <div class="multi-preview-block" v-if="images.length > 1">
+        <p>Images {{ imageSelected + 1 }} of {{ images.length }}</p>
+        <div class="images">
+          <a v-for="(image, key) in images" :key="image.src" @click="selectImage(key)">
+            <img :src="image.src" :class="{ selected: key === imageSelected }">
+          </a>
+        </div>
       </div>
       <div class="tools-block" v-if="imagesOrigin !== null && uploadError === false">
         <button @click="rotateImage(90)">↩ 順時針旋轉 90%</button>
@@ -384,21 +409,21 @@ onUnmounted(() => {
     <div class="information-block">
       <div class="origin">
         <p>
-          Name: <span v-if="imagesOrigin !== null">{{ imagesOrigin.item(0).name }}</span>
+          Name: <span v-if="imagesOrigin !== null">{{ imagesOrigin.item(imageSelected).name }}</span>
         </p>
         <p>
           Image type:
-          <span v-if="imagesOrigin !== null">{{ imagesOrigin.item(0).type }}</span>
+          <span v-if="imagesOrigin !== null">{{ imagesOrigin.item(imageSelected).type }}</span>
         </p>
         <p>
           Origin size:
           <span v-if="imagesOrigin !== null">
-            {{ Math.round((imagesOrigin.item(0).size / 1024) * 100) / 100 }} KB
-            ({{ imagesOrigin.item(0).size }} Bytes)</span>
+            {{ Math.round((imagesOrigin.item(imageSelected).size / 1024) * 100) / 100 }} KB
+            ({{ imagesOrigin.item(imageSelected).size }} Bytes)</span>
         </p>
         <p>
           Origin resolution:
-          <span v-if="images.length !== 0">{{ images[0].width }} * {{ images[0].height }}</span>
+          <span v-if="images.length !== 0">{{ images[imageSelected].width }} * {{ images[imageSelected].height }}</span>
         </p>
       </div>
       <div class="draw-tool">
@@ -410,9 +435,10 @@ onUnmounted(() => {
             <div>
               Type:
               <SwitchCheckbox :isChecked="resizeType === 'percent' ? false : true"
-                              :disable="images.length === 0 || needResize === false" v-on:switchChecked="switchResizeType"/>
+                              :disable="images.length !== 1 || needResize === false" v-on:switchChecked="switchResizeType" />
               <span v-if="resizeType === 'percent'"> Percent(%)</span>
               <span v-if="resizeType === 'pixel'"> Pixel(px)</span>
+              <p v-if="images.length > 1">💡 Multi images only allow percent.</p>
             </div>
             <div>
               Width:
@@ -562,10 +588,29 @@ onUnmounted(() => {
   width: 100%;
   height: 200px;
   background-color: var(--color-block-background2);
-  text-align: center;
   margin-top: 10px;
   padding: 10px;
   border-radius: 5px;
+  white-space: nowrap;
+}
+
+.multi-preview-block .images {
+  height: calc(100% - 25px);
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
+
+.multi-preview-block img {
+  width: 250px;
+  height: calc(100% - 10px);
+  margin: auto 10px;
+  object-fit: contain;
+  border: 1px #b5b5b5 solid;
+  cursor: pointer;
+}
+
+.multi-preview-block img.selected {
+  border: 4px #a96868 solid;
 }
 
 .tools-block {
