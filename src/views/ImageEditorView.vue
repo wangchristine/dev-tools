@@ -188,7 +188,6 @@ const downloadImage = () => {
 
         if(downloadImageType.value !== "base64") {
           canvas.value.toBlob((blob) => {
-            const url = URL.createObjectURL(blob);
             const fileName = `Dev-Tools_${imagesOrigin.value.item(i).name.slice(0, imagesOrigin.value.item(i).name.lastIndexOf("."))}.${downloadImageType.value}`;
             zip.file(fileName, blob);
             resolve();
