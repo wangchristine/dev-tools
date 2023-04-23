@@ -25,6 +25,9 @@
       <div class="log">
         <ul>
           <li>
+            [Apr 23, 2023] Image Editor can handle multiple images and download by zip.
+          </li>
+          <li>
             [Nov 1, 2022] Switch light/dark color theme button changing icon because of UIUX.
             <span class="thanks">(thanks Tim)</span>
           </li>

@@ -3,9 +3,12 @@ import { ref, onUnmounted } from "vue";
 import SwitchCheckbox from "@/components/SwitchCheckbox.vue";
 import RangeSlider from "@/components/RangeSlider.vue";
 import imageTypes from "@/config/imageType.json";
+import JSZip from 'jszip';
+import FileSaver from 'file-saver';
 
-let imageOrigin = ref(null);
-let image = ref(null);
+let imagesOrigin = ref(null);
+let images = ref([]);
+let imageSelected = ref(0);
 let imageRotate = ref(0);
 let imageInCanvasWidth = ref(0);
 let imageInCanvasHeight = ref(0);
@@ -64,14 +67,14 @@ const renderCanvas = () => {
       break;
   }
   ctx.save();
-  ctx.rotate(imageRotate.value * Math.PI / 180);
+  ctx.rotate((imageRotate.value * Math.PI) / 180);
   if (canvas.value.height <= 500) {
     canvas.value.style.maxHeight = "";
   } else {
     canvas.value.style.maxHeight = "500px";
   }
 
-  ctx.drawImage(image.value, 0, 0, image.value.width, image.value.height, drawX, drawY, imageInCanvasWidth.value, imageInCanvasHeight.value);
+  ctx.drawImage(images.value[imageSelected.value], 0, 0, images.value[imageSelected.value].width, images.value[imageSelected.value].height, drawX, drawY, imageInCanvasWidth.value, imageInCanvasHeight.value);
   ctx.restore();
 
   if (needWatermark.value) {
@@ -82,90 +85,193 @@ const renderCanvas = () => {
   }
 
   setExpectImageSize();
-}
+};
 
 const uploadImage = (event) => {
-  imageOrigin.value = event.target.files[0];
+  const promises = [];
+  imagesOrigin.value = event.target.files;
 
-  let img = new Image();
-  img.src = URL.createObjectURL(imageOrigin.value);
-  img.onload = () => {
-    image.value = img;
-    if (img.height > 500) {
-      canvas.value.style.maxHeight = "500px";
-    }
-    imageInCanvasWidth.value = img.width;
-    imageInCanvasHeight.value = img.height;
-    renderCanvas();
-
-    uploadError.value = false;
-    resize.value.disabled = false;
-    watermark.value.disabled = false;
-    download.value.disabled = false;
-  };
-  img.onerror = () => {
-    image.value = null;
+  // limit files count
+  if (imagesOrigin.value.length > 20) {
     resetImage();
     uploadError.value = true;
-  };
+    return;
+  }
 
+  for (let i = 0; i < imagesOrigin.value.length; i++) {
+    promises.push(
+      new Promise((resolve, reject) => {
+        if (!imagesOrigin.value.item(i).type.match(/^image\/[a-z]+/g)) {
+          reject();
+        }
+        let img = new Image();
+        img.src = URL.createObjectURL(imagesOrigin.value.item(i));
+
+        img.onload = () => {
+          images.value.push(img);
+          resolve();
+        };
+        img.onerror = () => {
+          reject();
+        };
+      })
+    );
+  }
+
+  Promise.all(promises)
+    .then(() => {
+      if (images.value[0].height > 500) {
+        canvas.value.style.maxHeight = "500px";
+      }
+      imageInCanvasWidth.value = images.value[0].width;
+      imageInCanvasHeight.value = images.value[0].height;
+      renderCanvas();
+
+      uploadError.value = false;
+      resize.value.disabled = false;
+      watermark.value.disabled = false;
+      download.value.disabled = false;
+    })
+    .catch(() => {
+      resetImage();
+      uploadError.value = true;
+    });
+};
+const selectImage = (idx) => {
+  imageSelected.value = idx;
+
+  if (images.value.length !== 0) {
+    if (needResize.value) {
+      if (resizeType.value === "percent") {
+        const rate = resizeWidth.value / 100;
+        imageInCanvasWidth.value = images.value[imageSelected.value].width * rate;
+        imageInCanvasHeight.value = images.value[imageSelected.value].height * rate;
+        renderCanvas();
+      }
+    } else {
+      imageInCanvasWidth.value = images.value[imageSelected.value].width;
+      imageInCanvasHeight.value = images.value[imageSelected.value].height;
+      renderCanvas();
+    }
+  }
 };
 const rotateImage = (rotateDeg) => {
   imageRotate.value = (imageRotate.value + rotateDeg) % 360;
   renderCanvas();
 };
-
 const downloadImage = () => {
-  const getImageMimeType = downloadImageType.value === "base64" ?
-    imageOrigin.value.type :
-    imageTypes.find((imageType) => {
-      return imageType.name === downloadImageType.value;
-    }).mimeType;
+  if(imagesOrigin.value.length > 1) {
+    const zip = new JSZip();
+    const promises = [];
+      
+    for(let i = 0; i < imagesOrigin.value.length; i++) {
+      const getImageMimeType = downloadImageType.value === "base64" ?
+        imagesOrigin.value.item(i).type :
+        imageTypes.find((imageType) => {
+          return imageType.name === downloadImageType.value;
+        }).mimeType;
+  
+      promises.push(new Promise((resolve) => {
+        imageSelected.value = i;
+        if (needResize.value) {
+          if (resizeType.value === "percent") {
+            const rate = resizeWidth.value / 100;
+            imageInCanvasWidth.value = images.value[imageSelected.value].width * rate;
+            imageInCanvasHeight.value = images.value[imageSelected.value].height * rate;
+            renderCanvas();
+          }
+        } else {
+          imageInCanvasWidth.value = images.value[imageSelected.value].width;
+          imageInCanvasHeight.value = images.value[imageSelected.value].height;
+          renderCanvas();
+        }
 
-  if (downloadImageType.value !== "base64") {
-    canvas.value.toBlob((blob) => {
+        if(downloadImageType.value !== "base64") {
+          canvas.value.toBlob((blob) => {
+            const url = URL.createObjectURL(blob);
+            const fileName = `Dev-Tools_${imagesOrigin.value.item(i).name.slice(0, imagesOrigin.value.item(i).name.lastIndexOf("."))}.${downloadImageType.value}`;
+            zip.file(fileName, blob);
+            resolve();
+
+          }, getImageMimeType, downloadImageQuality.value / 100);
+        } else {
+          const url = canvas.value.toDataURL(getImageMimeType, downloadImageQuality.value / 100);
+          const fileName = `Dev-Tools_${imagesOrigin.value.item(i).name.slice(0, imagesOrigin.value.item(i).name.lastIndexOf("."))}.txt`;
+          
+          zip.file(fileName, url);
+          resolve();
+        }
+      }));
+    }
+
+    Promise.all(promises).then(() => {
+      if(promises.length !== 0 && imagesOrigin.value.length > 1) {
+        zip.generateAsync({type:"blob"}).then(function(content) {
+          FileSaver.saveAs(content, "Dev Tools Images.zip");
+        });    
+      }
+    }).catch(() => {
+      console.log("zip error");
+    });
+  } else {
+    const getImageMimeType = downloadImageType.value === "base64" ?
+      imagesOrigin.value.item(0).type :
+      imageTypes.find((imageType) => {
+        return imageType.name === downloadImageType.value;
+      }).mimeType;
+
+    if(downloadImageType.value !== "base64") {
+      canvas.value.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const fileName = `Dev-Tools_${imagesOrigin.value.item(0).name.slice(0, imagesOrigin.value.item(0).name.lastIndexOf("."))}.${downloadImageType.value}`;
+        
+        const downloadLink = document.createElement("a");
+        downloadLink.href = url;
+        downloadLink.download = fileName;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        URL.revokeObjectURL(url);
+
+      }, getImageMimeType, downloadImageQuality.value / 100);
+    } else {
+      const url = 'data:text/plain;charset=UTF-8,' + '' + canvas.value.toDataURL(getImageMimeType, downloadImageQuality.value / 100);
+      const fileName = `Dev-Tools_${imagesOrigin.value.item(0).name.slice(0, imagesOrigin.value.item(0).name.lastIndexOf("."))}.txt`;
+
       const downloadLink = document.createElement("a");
-      const url = URL.createObjectURL(blob);
       downloadLink.href = url;
-      downloadLink.download = `Dev-Tools_${imageOrigin.value.name.slice(0, imageOrigin.value.name.lastIndexOf("."))}.${downloadImageType.value}`;
+      downloadLink.download = fileName;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
-      URL.revokeObjectURL(url);
-    }, getImageMimeType, downloadImageQuality.value / 100);
-  } else {
-    const downloadLink = document.createElement("a");
-    downloadLink.href = 'data:text/plain;charset=UTF-8,' + '' + canvas.value.toDataURL(getImageMimeType, downloadImageQuality.value / 100);
-    downloadLink.download = `Dev-Tools_${imageOrigin.value.name.slice(0, imageOrigin.value.name.lastIndexOf("."))}.txt`;
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
+    }
   }
+
 };
 
 const switchResize = () => {
   needResize.value = !needResize.value;
-  if (image.value) {
+  if (images.value.length !== 0) {
     if (needResize.value) {
       inputWidth.value.disabled = false;
       inputHeight.value.disabled = false;
 
       if (resizeType.value === "percent") {
         const rate = resizeWidth.value / 100;
-        imageInCanvasWidth.value = image.value.width * rate;
-        imageInCanvasHeight.value = image.value.height * rate;
+        imageInCanvasWidth.value = images.value[imageSelected.value].width * rate;
+        imageInCanvasHeight.value = images.value[imageSelected.value].height * rate;
         renderCanvas();
       } else {
-        const rate = resizeWidth.value / image.value.width;
+        const rate = resizeWidth.value / images.value[imageSelected.value].width;
         imageInCanvasWidth.value = resizeWidth.value;
-        imageInCanvasHeight.value = image.value.height * rate;
+        imageInCanvasHeight.value = images.value[imageSelected.value].height * rate;
         renderCanvas();
       }
     } else {
       inputWidth.value.disabled = true;
       inputHeight.value.disabled = true;
-      imageInCanvasWidth.value = image.value.width;
-      imageInCanvasHeight.value = image.value.height;
+      imageInCanvasWidth.value = images.value[imageSelected.value].width;
+      imageInCanvasHeight.value = images.value[imageSelected.value].height;
       renderCanvas();
     }
   }
@@ -173,16 +279,16 @@ const switchResize = () => {
 
 const switchResizeType = (isChecked) => {
   resizeType.value = isChecked ? "pixel" : "percent";
-  if (image.value) {
+  if (images.value.length !== 0) {
     if (resizeType.value === "percent") {
       resizeWidth.value = 100;
       resizeHeight.value = 100;
     } else {
-      resizeWidth.value = image.value.width;
-      resizeHeight.value = image.value.height;
+      resizeWidth.value = images.value[imageSelected.value].width;
+      resizeHeight.value = images.value[imageSelected.value].height;
     }
-    imageInCanvasWidth.value = image.value.width;
-    imageInCanvasHeight.value = image.value.height;
+    imageInCanvasWidth.value = images.value[imageSelected.value].width;
+    imageInCanvasHeight.value = images.value[imageSelected.value].height;
     renderCanvas();
   }
 };
@@ -196,18 +302,18 @@ const inputWidthInputEvent = () => {
     }
     resizeHeight.value = resizeWidth.value;
     const rate = resizeWidth.value / 100;
-    imageInCanvasWidth.value = image.value.width * rate;
-    imageInCanvasHeight.value = image.value.height * rate;
+    imageInCanvasWidth.value = images.value[imageSelected.value].width * rate;
+    imageInCanvasHeight.value = images.value[imageSelected.value].height * rate;
     renderCanvas();
   } else {
-    if (image.value) {
-      if (resizeWidth.value > image.value.width) {
-        resizeWidth.value = image.value.width;
+    if (images.value.length !== 0) {
+      if (resizeWidth.value > images.value[imageSelected.value].width) {
+        resizeWidth.value = images.value[imageSelected.value].width;
       }
-      const rate = resizeWidth.value / image.value.width;
-      resizeHeight.value = Math.floor(image.value.height * rate);
+      const rate = resizeWidth.value / images.value[imageSelected.value].width;
+      resizeHeight.value = Math.floor(images.value[imageSelected.value].height * rate);
       imageInCanvasWidth.value = resizeWidth.value;
-      imageInCanvasHeight.value = image.value.height * rate;
+      imageInCanvasHeight.value = images.value[imageSelected.value].height * rate;
       renderCanvas();
     }
   }
@@ -221,23 +327,23 @@ const inputHeightInputEvent = () => {
       resizeHeight.value = 100;
     }
     resizeWidth.value = resizeHeight.value;
-    const rate = (resizeHeight.value / 100);
-    imageInCanvasWidth.value = image.value.width * rate;
-    imageInCanvasHeight.value = image.value.height * rate;
+    const rate = resizeHeight.value / 100;
+    imageInCanvasWidth.value = images.value[imageSelected.value].width * rate;
+    imageInCanvasHeight.value = images.value[imageSelected.value].height * rate;
     renderCanvas();
   } else {
-    if (image.value) {
-      if (resizeHeight.value > image.value.height) {
-        resizeHeight.value = image.value.height;
+    if (images.value.length !== 0) {
+      if (resizeHeight.value > images.value[imageSelected.value].height) {
+        resizeHeight.value = images.value[imageSelected.value].height;
       }
-      const rate = resizeHeight.value / image.value.height;
-      resizeWidth.value = Math.floor(image.value.width * rate);
-      imageInCanvasWidth.value = image.value.width * rate;
+      const rate = resizeHeight.value / images.value[imageSelected.value].height;
+      resizeWidth.value = Math.floor(images.value[imageSelected.value].width * rate);
+      imageInCanvasWidth.value = images.value[imageSelected.value].width * rate;
       imageInCanvasHeight.value = resizeHeight.value;
       renderCanvas();
     }
   }
-}
+};
 
 const limitInputNumber = (event) => {
   return event.charCode >= 48 && event.charCode <= 57;
@@ -249,7 +355,7 @@ const inputWatermarkTextInputEvent = () => {
 
 const switchWatermark = () => {
   needWatermark.value = !needWatermark.value;
-  if (image.value) {
+  if (images.value.length !== 0) {
     if (needWatermark.value) {
       inputWatermarkText.value.disabled = false;
       renderCanvas();
@@ -267,7 +373,7 @@ const slideWatermarkSize = (sliderValue) => {
 
 const imageTypeChangeEvent = () => {
   setExpectImageSize();
-}
+};
 
 const slideImageQuality = (sliderValue) => {
   downloadImageQuality.value = sliderValue;
@@ -275,9 +381,9 @@ const slideImageQuality = (sliderValue) => {
 };
 
 const setExpectImageSize = () => {
-  if (image.value) {
+  if (images.value.length !== 0) {
     const getImageMimeType = downloadImageType.value === "base64" ?
-      imageOrigin.value.type : imageTypes.find((imageType) => {
+      imagesOrigin.value.item(imageSelected.value).type : imageTypes.find((imageType) => {
         return imageType.name === downloadImageType.value;
       }).mimeType;
     canvas.value.toBlob((blob) => {
@@ -285,12 +391,16 @@ const setExpectImageSize = () => {
     }, getImageMimeType, downloadImageQuality.value / 100);
   }
 };
+
 const resetImage = () => {
-  if (image.value) {
-    URL.revokeObjectURL(image.value.src);
+  if (images.value.length !== 0) {
+    images.value.forEach((image) => {
+      URL.revokeObjectURL(image.src);
+    });
   }
-  imageOrigin.value = null;
-  image.value = null;
+  imagesOrigin.value = null;
+  images.value = [];
+  imageSelected.value = 0;
   imageRotate.value = 0;
   imageInCanvasWidth.value = 0;
   imageInCanvasHeight.value = 0;
@@ -316,11 +426,13 @@ const resetImage = () => {
   watermark.value.disabled = true;
   inputWatermarkText.value.disabled = true;
   download.value.disabled = true;
-}
+};
 
 onUnmounted(() => {
-  if (image.value) {
-    URL.revokeObjectURL(image.value.src);
+  if (images.value.length !== 0) {
+    images.value.forEach((image) => {
+      URL.revokeObjectURL(image.src);
+    });
   }
 });
 </script>
@@ -329,20 +441,30 @@ onUnmounted(() => {
   <div class="container">
     <div class="image-block">
       <p class="title">Upload Image</p>
-      <label class="upload-file" v-if="imageOrigin === null">
+      <label class="upload-file" v-if="imagesOrigin === null">
         <div class="upload-block">
           <!-- 📂 -->
           <div class="icon">📁</div>
           <div class="text">Upload an image file or drag it here...</div>
-          <div class="error" v-if="uploadError">Upload Failed. Please upload the correct image file.</div>
+          <div class="error" v-if="uploadError">
+            Upload Failed. Please upload the correct image files and maximum number of files is 20.
+          </div>
         </div>
-        <input type="file" name="userImage" id="userImage" accept="image/*" @change="uploadImage" />
+        <input type="file" name="userImage" id="userImage" accept="image/*" @change="uploadImage" multiple />
       </label>
       <div class="preview-block" v-else>
         <canvas ref="canvas" id="canvas" class="preview-image" width="800" height="500"></canvas>
         <span class="reset-image" @click="resetImage">❌</span>
       </div>
-      <div class="tools-block" v-if="imageOrigin !== null && uploadError === false">
+      <div class="multi-preview-block" v-if="images.length > 1">
+        <p>Images {{ imageSelected + 1 }} of {{ images.length }}</p>
+        <div class="images">
+          <a v-for="(image, key) in images" :key="image.src" @click="selectImage(key)">
+            <img :src="image.src" :class="{ selected: key === imageSelected }">
+          </a>
+        </div>
+      </div>
+      <div class="tools-block" v-if="imagesOrigin !== null && uploadError === false">
         <button @click="rotateImage(90)">↩ 順時針旋轉 90%</button>
         <button @click="rotateImage(-90)">↪ 逆時針旋轉 90%</button>
       </div>
@@ -350,21 +472,21 @@ onUnmounted(() => {
     <div class="information-block">
       <div class="origin">
         <p>
-          Name: <span v-if="imageOrigin !== null">{{ imageOrigin.name }}</span>
+          Name: <span v-if="imagesOrigin !== null">{{ imagesOrigin.item(imageSelected).name }}</span>
         </p>
         <p>
           Image type:
-          <span v-if="imageOrigin !== null">{{ imageOrigin.type }}</span>
+          <span v-if="imagesOrigin !== null">{{ imagesOrigin.item(imageSelected).type }}</span>
         </p>
         <p>
           Origin size:
-          <span v-if="imageOrigin !== null">{{
-              Math.round((imageOrigin.size / 1024) * 100) / 100
-            }} KB ({{ imageOrigin.size }} Bytes)</span>
+          <span v-if="imagesOrigin !== null">
+            {{ Math.round((imagesOrigin.item(imageSelected).size / 1024) * 100) / 100 }} KB
+            ({{ imagesOrigin.item(imageSelected).size }} Bytes)</span>
         </p>
         <p>
           Origin resolution:
-          <span v-if="image !== null">{{ image.width }} * {{ image.height }}</span>
+          <span v-if="images.length !== 0">{{ images[imageSelected].width }} * {{ images[imageSelected].height }}</span>
         </p>
       </div>
       <div class="draw-tool">
@@ -375,10 +497,11 @@ onUnmounted(() => {
           <div class="tools">
             <div>
               Type:
-              <SwitchCheckbox :isChecked="resizeType === 'percent'? false : true"
-                              :disable="image === null || needResize === false" v-on:switchChecked="switchResizeType" />
+              <SwitchCheckbox :isChecked="resizeType === 'percent' ? false : true"
+                              :disable="images.length !== 1 || needResize === false" v-on:switchChecked="switchResizeType" />
               <span v-if="resizeType === 'percent'"> Percent(%)</span>
               <span v-if="resizeType === 'pixel'"> Pixel(px)</span>
+              <p v-if="images.length > 1">💡 Multi images only allow percent.</p>
             </div>
             <div>
               Width:
@@ -403,7 +526,7 @@ onUnmounted(() => {
             <div>
               Size:
               <RangeSlider :value="watermarkSize" :min="12" :max="72"
-                           :disable="image === null || needWatermark === false" @slideRange="slideWatermarkSize" />
+                           :disable="images.length === 0 || needWatermark === false" @slideRange="slideWatermarkSize" />
             </div>
           </div>
         </div>
@@ -414,17 +537,17 @@ onUnmounted(() => {
             <div class="image-type">
               <template v-for="(imageType, key) in imageTypes" :key="key">
                 <input type="radio" name="imageType" :id="imageType.name" :value="imageType.name"
-                       v-model="downloadImageType" :checked="key === 0" @change="imageTypeChangeEvent">
+                       v-model="downloadImageType" :checked="key === 0" @change="imageTypeChangeEvent" />
                 <label class="text" :for="imageType.name">{{ imageType.name.toUpperCase() }}</label>
               </template>
               <span class="divider"></span>
               <input type="radio" name="imageType" id="base64" value="base64"
-                     v-model="downloadImageType" @change="imageTypeChangeEvent">
+                     v-model="downloadImageType" @change="imageTypeChangeEvent" />
               <label class="text" for="base64">BASE64 FILE</label>
             </div>
           </div>
           <template
-            v-if="downloadImageType === 'jpg' || (imageOrigin !== null && downloadImageType === 'base64' && imageOrigin.type === 'image/jpeg')">
+            v-if="downloadImageType === 'jpg' || (imagesOrigin !== null && downloadImageType === 'base64' && imagesOrigin.item(imageSelected).type === 'image/jpeg')">
             Select image quality:
             <div class="tools">
               <RangeSlider :value="downloadImageQuality" :min="10" :max="100" :step="10"
@@ -432,12 +555,12 @@ onUnmounted(() => {
             </div>
           </template>
           Expect size:
-          <span v-if="expectImageSize !== null">{{
-              Math.round((expectImageSize / 1024) * 100) / 100
-            }} KB ({{ expectImageSize }} Bytes)</span>
+          <span v-if="expectImageSize !== null">
+            {{ Math.round((expectImageSize / 1024) * 100) / 100 }} KB ({{ expectImageSize }} Bytes)
+          </span>
         </div>
         <button ref="download" name="download" class="download" @click="downloadImage" disabled>
-          Download
+          Download <template v-if="images.length > 1">Zip</template>
         </button>
       </div>
     </div>
@@ -521,6 +644,36 @@ onUnmounted(() => {
   right: 5px;
   font-size: 28px;
   cursor: pointer;
+}
+
+.multi-preview-block {
+  display: block;
+  width: 100%;
+  height: 200px;
+  background-color: var(--color-block-background2);
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+
+.multi-preview-block .images {
+  height: calc(100% - 25px);
+  overflow-x: scroll;
+  overflow-y: hidden;
+}
+
+.multi-preview-block img {
+  width: 250px;
+  height: calc(100% - 10px);
+  margin: auto 10px;
+  object-fit: contain;
+  border: 1px #b5b5b5 solid;
+  cursor: pointer;
+}
+
+.multi-preview-block img.selected {
+  border: 4px #a96868 solid;
 }
 
 .tools-block {
@@ -611,7 +764,7 @@ onUnmounted(() => {
   border-top: 1px solid;
 }
 
-.image-type input[type=radio] {
+.image-type input[type="radio"] {
   display: none;
   opacity: 0;
   height: 0;
@@ -626,7 +779,7 @@ onUnmounted(() => {
   padding: 4px 12px;
 }
 
-.image-type input[type=radio]:checked + .text {
+.image-type input[type="radio"]:checked + .text {
   background-color: #60b699;
   color: #fff;
 }
