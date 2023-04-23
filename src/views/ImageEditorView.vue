@@ -3,6 +3,8 @@ import { ref, onUnmounted } from "vue";
 import SwitchCheckbox from "@/components/SwitchCheckbox.vue";
 import RangeSlider from "@/components/RangeSlider.vue";
 import imageTypes from "@/config/imageType.json";
+import JSZip from 'jszip';
+import FileSaver from 'file-saver';
 
 let imagesOrigin = ref(null);
 let images = ref([]);
@@ -157,33 +159,94 @@ const rotateImage = (rotateDeg) => {
   imageRotate.value = (imageRotate.value + rotateDeg) % 360;
   renderCanvas();
 };
-
 const downloadImage = () => {
-  const getImageMimeType = downloadImageType.value === "base64" ?
-    imagesOrigin.value.item(0).type :
-    imageTypes.find((imageType) => {
-      return imageType.name === downloadImageType.value;
-    }).mimeType;
+  if(imagesOrigin.value.length > 1) {
+    const zip = new JSZip();
+    const promises = [];
+      
+    for(let i = 0; i < imagesOrigin.value.length; i++) {
+      const getImageMimeType = downloadImageType.value === "base64" ?
+        imagesOrigin.value.item(i).type :
+        imageTypes.find((imageType) => {
+          return imageType.name === downloadImageType.value;
+        }).mimeType;
+  
+      promises.push(new Promise((resolve) => {
+        imageSelected.value = i;
+        if (needResize.value) {
+          if (resizeType.value === "percent") {
+            const rate = resizeWidth.value / 100;
+            imageInCanvasWidth.value = images.value[imageSelected.value].width * rate;
+            imageInCanvasHeight.value = images.value[imageSelected.value].height * rate;
+            renderCanvas();
+          }
+        } else {
+          imageInCanvasWidth.value = images.value[imageSelected.value].width;
+          imageInCanvasHeight.value = images.value[imageSelected.value].height;
+          renderCanvas();
+        }
 
-  if (downloadImageType.value !== "base64") {
-    canvas.value.toBlob((blob) => {
+        if(downloadImageType.value !== "base64") {
+          canvas.value.toBlob((blob) => {
+            const url = URL.createObjectURL(blob);
+            const fileName = `Dev-Tools_${imagesOrigin.value.item(i).name.slice(0, imagesOrigin.value.item(i).name.lastIndexOf("."))}.${downloadImageType.value}`;
+            zip.file(fileName, blob);
+            resolve();
+
+          }, getImageMimeType, downloadImageQuality.value / 100);
+        } else {
+          const url = canvas.value.toDataURL(getImageMimeType, downloadImageQuality.value / 100);
+          const fileName = `Dev-Tools_${imagesOrigin.value.item(i).name.slice(0, imagesOrigin.value.item(i).name.lastIndexOf("."))}.txt`;
+          
+          zip.file(fileName, url);
+          resolve();
+        }
+      }));
+    }
+
+    Promise.all(promises).then(() => {
+      if(promises.length !== 0 && imagesOrigin.value.length > 1) {
+        zip.generateAsync({type:"blob"}).then(function(content) {
+          FileSaver.saveAs(content, "Dev Tools Images.zip");
+        });    
+      }
+    }).catch(() => {
+      console.log("zip error");
+    });
+  } else {
+    const getImageMimeType = downloadImageType.value === "base64" ?
+      imagesOrigin.value.item(0).type :
+      imageTypes.find((imageType) => {
+        return imageType.name === downloadImageType.value;
+      }).mimeType;
+
+    if(downloadImageType.value !== "base64") {
+      canvas.value.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const fileName = `Dev-Tools_${imagesOrigin.value.item(0).name.slice(0, imagesOrigin.value.item(0).name.lastIndexOf("."))}.${downloadImageType.value}`;
+        
+        const downloadLink = document.createElement("a");
+        downloadLink.href = url;
+        downloadLink.download = fileName;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        URL.revokeObjectURL(url);
+
+      }, getImageMimeType, downloadImageQuality.value / 100);
+    } else {
+      const url = 'data:text/plain;charset=UTF-8,' + '' + canvas.value.toDataURL(getImageMimeType, downloadImageQuality.value / 100);
+      const fileName = `Dev-Tools_${imagesOrigin.value.item(0).name.slice(0, imagesOrigin.value.item(0).name.lastIndexOf("."))}.txt`;
+
       const downloadLink = document.createElement("a");
-      const url = URL.createObjectURL(blob);
       downloadLink.href = url;
-      downloadLink.download = `Dev-Tools_${imagesOrigin.value.item(0).name.slice(0, imagesOrigin.value.item(0).name.lastIndexOf("."))}.${downloadImageType.value}`;
+      downloadLink.download = fileName;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
-      URL.revokeObjectURL(url);
-    }, getImageMimeType, downloadImageQuality.value / 100);
-  } else {
-    const downloadLink = document.createElement("a");
-    downloadLink.href = "data:text/plain;charset=UTF-8," + "" + canvas.value.toDataURL(getImageMimeType, downloadImageQuality.value / 100);
-    downloadLink.download = `Dev-Tools_${imagesOrigin.value.item(0).name.slice(0, imagesOrigin.value.item(0).name.lastIndexOf("."))}.txt`;
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
+    }
   }
+
 };
 
 const switchResize = () => {
@@ -484,7 +547,7 @@ onUnmounted(() => {
             </div>
           </div>
           <template
-            v-if="downloadImageType === 'jpg' || (imagesOrigin !== null && downloadImageType === 'base64' && imagesOrigin.item(0).type === 'image/jpeg')">
+            v-if="downloadImageType === 'jpg' || (imagesOrigin !== null && downloadImageType === 'base64' && imagesOrigin.item(imageSelected).type === 'image/jpeg')">
             Select image quality:
             <div class="tools">
               <RangeSlider :value="downloadImageQuality" :min="10" :max="100" :step="10"
@@ -497,7 +560,7 @@ onUnmounted(() => {
           </span>
         </div>
         <button ref="download" name="download" class="download" @click="downloadImage" disabled>
-          Download
+          Download <template v-if="images.length > 1">Zip</template>
         </button>
       </div>
     </div>
