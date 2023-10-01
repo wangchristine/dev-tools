@@ -5,10 +5,10 @@ import { RouterLink, RouterView, useRoute } from "vue-router";
 const route = useRoute();
 let themeIcon = ref("");
 onMounted(() => {
-  if (localStorage.getItem("theme") === "dark") {
-    setTheme("dark");
-  } else {
+  if (localStorage.getItem("theme") === "light") {
     setTheme("light");
+  } else {
+    setTheme("dark");
   }
 });
 watch(() => route.name, () => {
@@ -179,7 +179,7 @@ header .header-right {
 main {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
   font-size: 16px;
   height: calc(100vh - 60px);
 }

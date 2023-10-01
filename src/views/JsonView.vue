@@ -306,7 +306,7 @@ const handleResize = () => {
   width: 100%;
   height: calc(100% - 60px);
   min-height: 100px;
-  overflow-y: scroll;
+  overflow-y: auto;
   resize: none;
   font-size: 16px;
   background-color: var(--color-block-background1);

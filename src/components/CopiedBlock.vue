@@ -77,16 +77,17 @@ onUnmounted(() => {
   padding: 10px 10px 10px 20px;
   width: 100%;
   height: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .copy {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 12px;
+  right: 20px;
   background-color: #bb8e8e;
   color: white;
   border: 0;
+  border-radius: 5px;
   padding: 8px 12px;
   font-size: 14px;
   cursor: pointer;
