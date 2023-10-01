@@ -160,17 +160,17 @@ const rotateImage = (rotateDeg) => {
   renderCanvas();
 };
 const downloadImage = () => {
-  if(imagesOrigin.value.length > 1) {
+  if (imagesOrigin.value.length > 1) {
     const zip = new JSZip();
     const promises = [];
-      
-    for(let i = 0; i < imagesOrigin.value.length; i++) {
+
+    for (let i = 0; i < imagesOrigin.value.length; i++) {
       const getImageMimeType = downloadImageType.value === "base64" ?
         imagesOrigin.value.item(i).type :
         imageTypes.find((imageType) => {
           return imageType.name === downloadImageType.value;
         }).mimeType;
-  
+
       promises.push(new Promise((resolve) => {
         imageSelected.value = i;
         if (needResize.value) {
@@ -186,7 +186,7 @@ const downloadImage = () => {
           renderCanvas();
         }
 
-        if(downloadImageType.value !== "base64") {
+        if (downloadImageType.value !== "base64") {
           canvas.value.toBlob((blob) => {
             const fileName = `Dev-Tools_${imagesOrigin.value.item(i).name.slice(0, imagesOrigin.value.item(i).name.lastIndexOf("."))}.${downloadImageType.value}`;
             zip.file(fileName, blob);
@@ -196,7 +196,7 @@ const downloadImage = () => {
         } else {
           const url = canvas.value.toDataURL(getImageMimeType, downloadImageQuality.value / 100);
           const fileName = `Dev-Tools_${imagesOrigin.value.item(i).name.slice(0, imagesOrigin.value.item(i).name.lastIndexOf("."))}.txt`;
-          
+
           zip.file(fileName, url);
           resolve();
         }
@@ -204,10 +204,10 @@ const downloadImage = () => {
     }
 
     Promise.all(promises).then(() => {
-      if(promises.length !== 0 && imagesOrigin.value.length > 1) {
-        zip.generateAsync({type:"blob"}).then(function(content) {
+      if (promises.length !== 0 && imagesOrigin.value.length > 1) {
+        zip.generateAsync({ type: "blob" }).then(function (content) {
           FileSaver.saveAs(content, "Dev Tools Images.zip");
-        });    
+        });
       }
     }).catch(() => {
       console.log("zip error");
@@ -219,11 +219,11 @@ const downloadImage = () => {
         return imageType.name === downloadImageType.value;
       }).mimeType;
 
-    if(downloadImageType.value !== "base64") {
+    if (downloadImageType.value !== "base64") {
       canvas.value.toBlob((blob) => {
         const url = URL.createObjectURL(blob);
         const fileName = `Dev-Tools_${imagesOrigin.value.item(0).name.slice(0, imagesOrigin.value.item(0).name.lastIndexOf("."))}.${downloadImageType.value}`;
-        
+
         const downloadLink = document.createElement("a");
         downloadLink.href = url;
         downloadLink.download = fileName;
@@ -497,7 +497,7 @@ onUnmounted(() => {
             <div>
               Type:
               <SwitchCheckbox :isChecked="resizeType === 'percent' ? false : true"
-                              :disable="images.length !== 1 || needResize === false" v-on:switchChecked="switchResizeType" />
+                :disable="images.length !== 1 || needResize === false" v-on:switchChecked="switchResizeType" />
               <span v-if="resizeType === 'percent'"> Percent(%)</span>
               <span v-if="resizeType === 'pixel'"> Pixel(px)</span>
               <p v-if="images.length > 1">💡 Multi images only allow percent.</p>
@@ -505,27 +505,27 @@ onUnmounted(() => {
             <div>
               Width:
               <input type="number" v-model.number="resizeWidth" ref="inputWidth" min="1" step="1"
-                     :onkeypress="limitInputNumber" @input="inputWidthInputEvent" disabled />
+                :onkeypress="limitInputNumber" @input="inputWidthInputEvent" disabled />
               Height:
               <input type="number" v-model.number="resizeHeight" ref="inputHeight" min="1" step="1"
-                     :onkeypress="limitInputNumber" @input="inputHeightInputEvent" disabled />
+                :onkeypress="limitInputNumber" @input="inputHeightInputEvent" disabled />
             </div>
           </div>
         </div>
         <div class="watermark">
           <input type="checkbox" ref="watermark" id="watermark" :checked="needWatermark" @change="switchWatermark"
-                 disabled />
+            disabled />
           <label for="watermark"> Watermark</label>
           <div class="tools">
             <div>
               Text:
               <input type="text" v-model.trim="watermarkText" ref="inputWatermarkText"
-                     @input="inputWatermarkTextInputEvent" disabled />
+                @input="inputWatermarkTextInputEvent" disabled />
             </div>
             <div>
               Size:
               <RangeSlider :value="watermarkSize" :min="12" :max="72"
-                           :disable="images.length === 0 || needWatermark === false" @slideRange="slideWatermarkSize" />
+                :disable="images.length === 0 || needWatermark === false" @slideRange="slideWatermarkSize" />
             </div>
           </div>
         </div>
@@ -536,12 +536,12 @@ onUnmounted(() => {
             <div class="image-type">
               <template v-for="(imageType, key) in imageTypes" :key="key">
                 <input type="radio" name="imageType" :id="imageType.name" :value="imageType.name"
-                       v-model="downloadImageType" :checked="key === 0" @change="imageTypeChangeEvent" />
+                  v-model="downloadImageType" :checked="key === 0" @change="imageTypeChangeEvent" />
                 <label class="text" :for="imageType.name">{{ imageType.name.toUpperCase() }}</label>
               </template>
               <span class="divider"></span>
-              <input type="radio" name="imageType" id="base64" value="base64"
-                     v-model="downloadImageType" @change="imageTypeChangeEvent" />
+              <input type="radio" name="imageType" id="base64" value="base64" v-model="downloadImageType"
+                @change="imageTypeChangeEvent" />
               <label class="text" for="base64">BASE64 FILE</label>
             </div>
           </div>
@@ -550,7 +550,7 @@ onUnmounted(() => {
             Select image quality:
             <div class="tools">
               <RangeSlider :value="downloadImageQuality" :min="10" :max="100" :step="10"
-                           @slideRange="slideImageQuality" />
+                @slideRange="slideImageQuality" />
             </div>
           </template>
           Expect size:

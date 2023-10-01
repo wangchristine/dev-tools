@@ -177,6 +177,7 @@ watch(userString, (userInput) => {
 
 .detail-block .title {
   font-size: 18px;
+  font-weight: bold;
 }
 
 .right-block {
