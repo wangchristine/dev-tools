@@ -3,7 +3,9 @@ import { ref, onMounted, watch } from "vue";
 import { RouterLink, RouterView, useRoute } from "vue-router";
 
 const route = useRoute();
-let themeIcon = ref("");
+const currentTheme = ref(null);
+const themeIcon = ref("");
+
 onMounted(() => {
   if (localStorage.getItem("theme") === "light") {
     setTheme("light");
@@ -11,9 +13,11 @@ onMounted(() => {
     setTheme("dark");
   }
 });
+
 watch(() => route.name, () => {
   toolLink.value.style.display = "";
 });
+
 const switchTheme = () => {
   if (localStorage.getItem("theme") === "dark") {
     setTheme("light");
@@ -26,10 +30,12 @@ const setTheme = (theme) => {
   if (theme == "dark") {
     document.documentElement.className = "dark";
     localStorage.setItem("theme", "dark");
+    currentTheme.value = "dark";
     themeIcon.value = "🌞";
   } else {
     document.documentElement.className = "";
     localStorage.setItem("theme", "light");
+    currentTheme.value = "light";
     themeIcon.value = "🌙";
   }
 };
@@ -42,6 +48,7 @@ const toggleBurger = () => {
     toolLink.value.style.display = "";
   }
 };
+
 </script>
 
 <template>
@@ -55,9 +62,10 @@ const toggleBurger = () => {
     </nav>
     <button class="burger" @click="toggleBurger">≡</button>
     <div class="header-right">
-      <a href="https://github.com/wangchristine/dev-tools" target="_blank" class="github-text">Star me at GitHub!🎉</a>
       <a href="https://github.com/wangchristine/dev-tools" target="_blank" class="github-icon">
-        <img src="@/assets/github.png" alt="github">
+        <img v-if="currentTheme == 'dark'" src="@/assets/github-mark-white.png" alt="github" class="github-dark">
+        <img v-else src="@/assets/github.png" alt="github" class="github-light">
+        
       </a>
       <button name="theme" class="theme" @click="switchTheme">
         {{ themeIcon }}
@@ -142,20 +150,10 @@ header .burger {
 header .header-right {
   float: right;
   display: flex;
-}
-
-.github-text {
-  text-decoration: none;
-  padding: 2px 0 2px 6px;
-  margin-right: 20px;
-  background-color: rgb(96, 182, 153);
-  border-radius: 5px;
-  color: rgb(239, 239, 239);
-  display: inline;
+  height: 28px;
 }
 
 .github-icon {
-  display: none;
   margin-right: 16px;
 }
 
@@ -163,9 +161,7 @@ header .header-right {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1px solid;
-  padding: 2px;
-  background-color: #fff;
+  padding: 1px;
   color: var(--color-text);
 }
 
@@ -185,10 +181,6 @@ main {
 }
 
 @media (max-width: 830px) {
-  .github-text {
-    display: none;
-  }
-
   .github-icon {
     display: inline;
   }
