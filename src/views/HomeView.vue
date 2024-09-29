@@ -9,6 +9,8 @@
         The inspiration of Dev Tools comes from my usual and work coding
         experience. This website contains tools commonly used in development,
         and continually updating.
+        <br><br>
+        Copyright © 2022-{{ new Date().getFullYear() }} Chris Wang
       </div>
     </div>
     <div class="about">
@@ -24,6 +26,9 @@
       <div class="description">Special thanks in alphabetical order</div>
       <div class="log">
         <ul>
+          <li>
+            [Sep 29, 2024] Change GitHub link style.
+          </li>
           <li>
             [Apr 23, 2023] Image Editor can handle multiple images and download by zip.
           </li>
