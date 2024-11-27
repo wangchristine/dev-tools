@@ -108,7 +108,7 @@ const uploadImage = (event) => {
         img.src = URL.createObjectURL(imagesOrigin.value.item(i));
 
         img.onload = () => {
-          images.value.push(img);
+          images.value[i] = img;
           resolve();
         };
         img.onerror = () => {
@@ -458,8 +458,8 @@ onUnmounted(() => {
       <div class="multi-preview-block" v-if="images.length > 1">
         <p>Images {{ imageSelected + 1 }} of {{ images.length }}</p>
         <div class="images">
-          <a v-for="(image, key) in images" :key="image.src" @click="selectImage(key)">
-            <img :src="image.src" :class="{ selected: key === imageSelected }">
+          <a v-for="(image, key) in images" :key="image?.src" @click="selectImage(key)">
+            <img :src="image?.src" :class="{ selected: key === imageSelected }">
           </a>
         </div>
       </div>
@@ -485,7 +485,7 @@ onUnmounted(() => {
         </p>
         <p>
           Origin resolution:
-          <span v-if="images.length !== 0">{{ images[imageSelected].width }} * {{ images[imageSelected].height }}</span>
+          <span v-if="images.length !== 0">{{ images[imageSelected]?.width }} * {{ images[imageSelected]?.height }}</span>
         </p>
       </div>
       <div class="draw-tool">
