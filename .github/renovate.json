@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"],
+  "extends": ["config:recommended", "schedule:weekly", "group:allNonMajor"],
   "automerge": false,
   "baseBranches": ["master"],
   "configMigration": true,
@@ -10,13 +10,13 @@
   "packageRules": [
     {
       "groupName": "Vue Core Dependencies",
-      "schedule": ["every weekend"],
+      "schedule": ["before 5:00am"],
       "matchPackageNames": ["vue", "nuxt", "vite"]
     },
     {
       "groupName": "Vue Ecosystem Dependencies",
-      "schedule": ["* 0-3 1 * *"],
-      "matchPackageNames": ["/^vue/", "/^@vue/", "/^nuxt/", "/^@nuxt/", "/^vite/", "/^@vite/", "pinia"]
+      "schedule": ["* 0-3 * * 4"],
+      "matchPackageNames": ["/^(?:@)?vue/", "/^(?:@)?nuxt/", "/^(?:@)?vite/", "pinia"]
     }
   ],
   "rangeStrategy": "bump"
