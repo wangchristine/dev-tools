@@ -16,7 +16,7 @@
     {
       "groupName": "Vue Ecosystem Dependencies",
       "schedule": ["* 0-3 * * 4"],
-      "matchPackageNames": ["/^(?:@)?vue/", "/^(?:@)?nuxt/", "/^(?:@)?vite/", "pinia"]
+      "matchPackageNames": ["/^(?:@)?vue.+/", "/^(?:@)?nuxt.+/", "/^(?:@)?vite.+/", "pinia"]
     }
   ],
   "rangeStrategy": "bump"
