@@ -16,8 +16,8 @@
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.10.4",
-    "@vitejs/plugin-vue": "^2.3.1",
-    "@vue/eslint-config-prettier": "^7.0.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/eslint-config-prettier": "^10.1.0",
     "eslint": "^8.57.1",
     "eslint-plugin-vue": "^8.2.0",
     "prettier": "^2.5.1",
