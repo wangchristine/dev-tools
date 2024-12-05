@@ -4,7 +4,6 @@ import { RouterLink, RouterView, useRoute } from "vue-router";
 
 const route = useRoute();
 const currentTheme = ref(null);
-const themeIcon = ref("");
 
 onMounted(() => {
   if (localStorage.getItem("theme") === "light") {
@@ -31,12 +30,10 @@ const setTheme = (theme) => {
     document.documentElement.className = "dark";
     localStorage.setItem("theme", "dark");
     currentTheme.value = "dark";
-    themeIcon.value = "🌞";
   } else {
     document.documentElement.className = "";
     localStorage.setItem("theme", "light");
     currentTheme.value = "light";
-    themeIcon.value = "🌙";
   }
 };
 
@@ -65,10 +62,9 @@ const toggleBurger = () => {
       <a href="https://github.com/wangchristine/dev-tools" target="_blank" class="github-icon">
         <img v-if="currentTheme == 'dark'" src="@/assets/github-mark-white.png" alt="github" class="github-dark">
         <img v-else src="@/assets/github.png" alt="github" class="github-light">
-        
       </a>
       <button name="theme" class="theme" @click="switchTheme">
-        {{ themeIcon }}
+        <FontAwesomeIcon :icon="['fas', (currentTheme == 'dark' ? 'sun' : 'moon')]" size="lg" />
       </button>
     </div>
   </header>
@@ -170,6 +166,11 @@ header .header-right {
   width: 28px;
   border-radius: 50%;
   padding: 0;
+  border: 0;
+}
+
+.theme svg {
+  color: #ffc225;
 }
 
 main {
