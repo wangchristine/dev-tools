@@ -111,7 +111,7 @@ watch(userString, (userInput) => {
         <label for="method-decode">decode</label>
       </div>
       <div class="detail-block">
-        <p class="title">🛠 Description</p>
+        <p class="title"><FontAwesomeIcon :icon="['fas', 'screwdriver-wrench']" /> Description</p>
         <p>{{ typeDescription }}</p>
       </div>
     </div>

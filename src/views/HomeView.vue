@@ -27,6 +27,9 @@
       <div class="log">
         <ul>
           <li>
+            [Dec 6, 2024] Change all icons style.
+          </li>
+          <li>
             [Sep 29, 2024] Change GitHub link style.
           </li>
           <li>

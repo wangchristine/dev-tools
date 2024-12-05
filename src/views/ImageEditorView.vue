@@ -442,8 +442,7 @@ onUnmounted(() => {
       <p class="title">Upload Image</p>
       <label class="upload-file" v-if="imagesOrigin === null">
         <div class="upload-block">
-          <!-- 📂 -->
-          <div class="icon">📁</div>
+          <div class="icon"><FontAwesomeIcon :icon="['fas', 'folder-open']" /></div>
           <div class="text">Upload an image file or drag it here...</div>
           <div class="error" v-if="uploadError">
             Upload Failed. Please upload the correct image files and maximum number of files is 20.
@@ -453,7 +452,7 @@ onUnmounted(() => {
       </label>
       <div class="preview-block" v-else>
         <canvas ref="canvas" id="canvas" class="preview-image" width="800" height="500"></canvas>
-        <span class="reset-image" @click="resetImage">❌</span>
+        <span class="reset-image" @click="resetImage"><FontAwesomeIcon :icon="['fas', 'xmark']" size="xl" /></span>
       </div>
       <div class="multi-preview-block" v-if="images.length > 1">
         <p>Images {{ imageSelected + 1 }} of {{ images.length }}</p>
@@ -464,8 +463,8 @@ onUnmounted(() => {
         </div>
       </div>
       <div class="tools-block" v-if="imagesOrigin !== null && uploadError === false">
-        <button @click="rotateImage(90)">↩ 順時針旋轉 90%</button>
-        <button @click="rotateImage(-90)">↪ 逆時針旋轉 90%</button>
+        <button @click="rotateImage(90)"><FontAwesomeIcon :icon="['fas', 'arrow-rotate-left']" flip="vertical" /> 順時針旋轉 90%</button>
+        <button @click="rotateImage(-90)"><FontAwesomeIcon :icon="['fas', 'arrow-rotate-right']" flip="vertical" /> 逆時針旋轉 90%</button>
       </div>
     </div>
     <div class="information-block">
@@ -500,7 +499,8 @@ onUnmounted(() => {
                 :disable="images.length !== 1 || needResize === false" v-on:switchChecked="switchResizeType" />
               <span v-if="resizeType === 'percent'"> Percent(%)</span>
               <span v-if="resizeType === 'pixel'"> Pixel(px)</span>
-              <p v-if="images.length > 1">💡 Multi images only allow percent.</p>
+              
+              <p v-if="images.length > 1" class="hint"><FontAwesomeIcon :icon="['fas', 'lightbulb']" /> Multi images only allow percent.</p>
             </div>
             <div>
               Width:
@@ -602,6 +602,7 @@ onUnmounted(() => {
 
 .upload-block .icon {
   font-size: 48px;
+  color: #bea545;
 }
 
 .upload-block .text {
@@ -640,9 +641,10 @@ onUnmounted(() => {
 .preview-block .reset-image {
   position: absolute;
   top: 0px;
-  right: 5px;
+  right: 8px;
   font-size: 28px;
   cursor: pointer;
+  color: #fb7a99;
 }
 
 .multi-preview-block {
@@ -720,6 +722,10 @@ onUnmounted(() => {
 
 .tools > div {
   margin-top: 5px;
+}
+
+.tools .hint svg {
+  color: #bea545;
 }
 
 .tools input[type="number"] {

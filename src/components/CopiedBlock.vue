@@ -58,7 +58,8 @@ onUnmounted(() => {
       <slot></slot>
     </div>
     <button class="copy" ref="copy" @click="copyToClipboard()">
-      {{ copyText }} 📄
+      {{ copyText }} 
+      <FontAwesomeIcon :icon="['fas', 'file']" />
     </button>
   </div>
 </template>

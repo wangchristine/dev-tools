@@ -205,10 +205,10 @@ const handleResize = () => {
       <div class="block-title">
         Result
         <button class="all-open-control" data-text="Expand All" @click="setIsAllOpen(true)"
-                :disabled="isAllOpen === true">+
+                :disabled="isAllOpen === true"><FontAwesomeIcon :icon="['fas', 'plus']" size="sm" />
         </button>
         <button class="all-open-control" data-text="Collapse All" @click="setIsAllOpen(false)"
-                :disabled="isAllOpen === false">-
+                :disabled="isAllOpen === false"><FontAwesomeIcon :icon="['fas', 'minus']" size="sm" />
         </button>
         <div class="radio-block">
           Parse Unicode?
@@ -274,7 +274,7 @@ const handleResize = () => {
 
 .all-open-control {
   position: relative;
-  padding: 2px 8px;
+  padding: 2px 5px;
   font-size: 14px;
   font-weight: bold;
   margin-left: 2px;
