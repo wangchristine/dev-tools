@@ -682,7 +682,7 @@ onUnmounted(() => {
 }
 
 .tools-block button {
-  background-color: #60b699;
+  background-color: var(--color-main-theme);
   color: #fff;
   padding: 10px 20px;
   border: 0;
@@ -785,12 +785,12 @@ onUnmounted(() => {
 }
 
 .image-type input[type="radio"]:checked + .text {
-  background-color: #60b699;
+  background-color: var(--color-main-theme);
   color: #fff;
 }
 
 .image-type .divider {
-  border-left: 1px solid var(--color-text);
+  border-left: 1px solid;
   margin: 0px 7px;
   padding: 4px 0;
 }

@@ -91,7 +91,7 @@ header {
 
 .brand-title {
   margin: 0 20px;
-  color: #60b699;
+  color: var(--color-main-theme);
   font-weight: bold;
   font-size: 18px;
   text-decoration: none;
@@ -158,7 +158,6 @@ header .header-right {
   height: 28px;
   border-radius: 50%;
   padding: 1px;
-  color: var(--color-text);
 }
 
 .theme {

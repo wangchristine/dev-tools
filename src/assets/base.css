@@ -1,5 +1,7 @@
 /* color palette from <https://github.com/vuejs/theme> */
 :root {
+  --vt-c-main-theme: #60b699;
+
   --vt-c-header-background-light: #ffffff;
   --vt-c-header-background-dark: #2c2a2a;
 
@@ -33,6 +35,8 @@
 
 /* semantic color variables for this project */
 :root {
+  --color-main-theme: var(--vt-c-main-theme);
+
   --color-header-background: var(--vt-c-header-background-light);
   --color-header-bottom: var(--vt-c-header-bottom-light);
   --color-header-divider: var(--vt-c-header-divider-light);
@@ -49,6 +53,8 @@
 }
 
 .dark {
+  --color-main-theme: var(--vt-c-main-theme);
+
   --color-header-background: var(--vt-c-header-background-dark);
   --color-header-bottom: var(--vt-c-header-bottom-dark);
   --color-header-divider: var(--vt-c-header-divider-dark);
@@ -108,14 +114,14 @@ input[type="radio"].radio {
 }
 
 input[type="radio"].radio:checked {
-  border-color: #60b699;
+  border-color: var(--color-main-theme);
 }
 
 input[type="radio"].radio::after {
   content: "";
   width: 8px;
   height: 8px;
-  background-color: #60b699;
+  background-color: var(--color-main-theme);
   border-radius: 50%;
   position: absolute;
   top: 50%;
@@ -145,8 +151,8 @@ input[type="radio"].radio:checked::after {
 }
 
 input[type="checkbox"].checkbox:checked {
-  border-color: #60b699;
-  background-color: #60b699;
+  border-color: var(--color-main-theme);
+  background-color: var(--color-main-theme);
 }
 
 input[type="checkbox"].checkbox::after {

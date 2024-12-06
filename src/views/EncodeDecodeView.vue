@@ -219,13 +219,6 @@ watch(userString, (userInput) => {
   color: var(--color-block-text1);
 }
 
-.string-block {
-  color: var(--color-block-text3);
-  border: black 1px solid;
-  height: calc(100% - 52px);
-  background-color: var(--color-block-background1);
-}
-
 .result-string {
   position: absolute;
   padding: 10px 10px 10px 20px;
