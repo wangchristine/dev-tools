@@ -1,5 +1,7 @@
 /* color palette from <https://github.com/vuejs/theme> */
 :root {
+  --vt-c-main-theme: #60b699;
+
   --vt-c-header-background-light: #ffffff;
   --vt-c-header-background-dark: #2c2a2a;
 
@@ -33,6 +35,8 @@
 
 /* semantic color variables for this project */
 :root {
+  --color-main-theme: var(--vt-c-main-theme);
+
   --color-header-background: var(--vt-c-header-background-light);
   --color-header-bottom: var(--vt-c-header-bottom-light);
   --color-header-divider: var(--vt-c-header-divider-light);
@@ -49,6 +53,8 @@
 }
 
 .dark {
+  --color-main-theme: var(--vt-c-main-theme);
+
   --color-header-background: var(--vt-c-header-background-dark);
   --color-header-bottom: var(--vt-c-header-bottom-dark);
   --color-header-divider: var(--vt-c-header-divider-dark);
@@ -90,4 +96,79 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* radio */
+input[type="radio"].radio {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-block-text1);
+  border-radius: 50%;
+  outline: none;
+  cursor: pointer;
+  display: inline-block;
+  margin: 0;
+  position: relative;
+}
+
+input[type="radio"].radio:checked {
+  border-color: var(--color-main-theme);
+}
+
+input[type="radio"].radio::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-main-theme);
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+input[type="radio"].radio:checked::after {
+  opacity: 1;
+}
+
+/* checkbox */
+ input[type="checkbox"].checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-block-text1);
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+  margin: 0;
+  display: inline-block;
+}
+
+input[type="checkbox"].checkbox:checked {
+  border-color: var(--color-main-theme);
+  background-color: var(--color-main-theme);
+}
+
+input[type="checkbox"].checkbox::after {
+  content: "";
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+input[type="checkbox"].checkbox:checked::after {
+  opacity: 1;
 }

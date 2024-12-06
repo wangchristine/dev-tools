@@ -61,7 +61,7 @@ input[type="checkbox"] {
 }
 
 input:checked + .switchToggle {
-  background-color: #60b699;
+  background-color: var(--color-main-theme);
 }
 
 .switchToggle:active:after {

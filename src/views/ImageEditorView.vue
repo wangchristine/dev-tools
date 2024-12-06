@@ -490,7 +490,7 @@ onUnmounted(() => {
       <div class="draw-tool">
         <div class="title">Tools</div>
         <div class="resize">
-          <input type="checkbox" ref="resize" id="resize" :checked="needResize" @change="switchResize" disabled />
+          <input type="checkbox" class="checkbox" ref="resize" id="resize" :checked="needResize" @change="switchResize" disabled />
           <label for="resize"> Resize</label>
           <div class="tools">
             <div>
@@ -513,7 +513,7 @@ onUnmounted(() => {
           </div>
         </div>
         <div class="watermark">
-          <input type="checkbox" ref="watermark" id="watermark" :checked="needWatermark" @change="switchWatermark"
+          <input type="checkbox" class="checkbox" ref="watermark" id="watermark" :checked="needWatermark" @change="switchWatermark"
             disabled />
           <label for="watermark"> Watermark</label>
           <div class="tools">
@@ -682,7 +682,7 @@ onUnmounted(() => {
 }
 
 .tools-block button {
-  background-color: #60b699;
+  background-color: var(--color-main-theme);
   color: #fff;
   padding: 10px 20px;
   border: 0;
@@ -785,12 +785,12 @@ onUnmounted(() => {
 }
 
 .image-type input[type="radio"]:checked + .text {
-  background-color: #60b699;
+  background-color: var(--color-main-theme);
   color: #fff;
 }
 
 .image-type .divider {
-  border-left: 1px solid var(--color-text);
+  border-left: 1px solid;
   margin: 0px 7px;
   padding: 4px 0;
 }

@@ -74,7 +74,7 @@ input[type=range] {
 
 input[type=range]::-webkit-slider-thumb {
   appearance: none;
-  background: #60b699;
+  background: var(--color-main-theme);
   border-radius: 50%;
   width: 20px;
   height: 20px;
@@ -82,7 +82,7 @@ input[type=range]::-webkit-slider-thumb {
 
 input[type=range]::-moz-range-thumb {
   appearance: none;
-  background: #60b699;
+  background: var(--color-main-theme);
   border-radius: 50%;
   width: 20px;
   height: 20px;
