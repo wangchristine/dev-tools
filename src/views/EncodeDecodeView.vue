@@ -75,6 +75,7 @@ watch(userString, (userInput) => {
         <p>Type</p>
         <input
           type="radio"
+          class="radio"
           name="type"
           id="type-base64"
           value="base64"
@@ -84,6 +85,7 @@ watch(userString, (userInput) => {
         <label for="type-base64">base64</label>
         <input
           type="radio"
+          class="radio"
           name="type"
           id="type-url"
           value="url"
@@ -94,6 +96,7 @@ watch(userString, (userInput) => {
         <p>Encode/Decode</p>
         <input
           type="radio"
+          class="radio"
           name="method"
           id="method-encode"
           value="encode"
@@ -103,6 +106,7 @@ watch(userString, (userInput) => {
         <label for="method-encode">encode</label>
         <input
           type="radio"
+          class="radio"
           name="method"
           id="method-decode"
           value="decode"
