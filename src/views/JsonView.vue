@@ -1,8 +1,8 @@
 <script setup>
 import { ref, watch, onUnmounted, onMounted } from "vue";
+import CopiedBlock from "@/components/CopiedBlock.vue";
 import JsonTree from "@/components/JsonTree.vue";
 import SwitchCheckbox from "@/components/SwitchCheckbox.vue";
-import CopiedBlock from "@/components/CopiedBlock.vue";
 
 const jsonString = ref("");
 const jsonObj = ref();
@@ -47,7 +47,7 @@ const selectExample = (event) => {
       jsonString.value = String.raw`"\"\\u6fb3\\u9580\\u570b\\u969b\\u6a5f\\u5834\""`;
       break;
   }
-}
+};
 
 let isQuotationChecked = ref(false);
 const switchInQuotes = (isChecked) => {
@@ -85,7 +85,11 @@ const renderResult = (userInput) => {
         if (userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"') !== "") {
           if (isUnicodeChecked.value) {
             jsonObj.value = JSON.parse(
-              userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"').replaceAll(/\\\\u/g, "\\u"));
+              userInput
+                .slice(1, userInput.length - 1)
+                .replaceAll('\\"', '"')
+                .replaceAll(/\\\\u/g, "\\u"),
+            );
           } else {
             jsonObj.value = JSON.parse(userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"'));
           }
@@ -104,9 +108,7 @@ const renderResult = (userInput) => {
         if (isUnicodeChecked.value) {
           jsonObj.value = JSON.parse(userInput.replaceAll(/\\\\u/g, "\\u"));
         } else {
-          jsonObj.value = JSON.parse(
-            userInput.replaceAll(/(?<=[^\\])\\u/g, "\\\\u")
-          );
+          jsonObj.value = JSON.parse(userInput.replaceAll(/(?<=[^\\])\\u/g, "\\\\u"));
         }
       }
       errorMessage.value = "";
@@ -143,7 +145,7 @@ onMounted(() => {
   containerWidth.value = container.value.clientWidth;
   window.addEventListener("mousemove", handleMousemove);
   window.addEventListener("mouseup", handleMouseup);
-  window.addEventListener('resize', handleResize);
+  window.addEventListener("resize", handleResize);
 });
 onUnmounted(() => {
   window.removeEventListener("mousemove", handleMousemove);
@@ -153,10 +155,8 @@ onUnmounted(() => {
 
 const handleMousemove = (e) => {
   if (isDragging.value) {
-    userBlock.value.style.width =
-      userBlockWidth.value + (e.clientX - lastMouseX.value) + "px";
-    resultBlock.value.style.width =
-      resultBlockWidth.value - (e.clientX - lastMouseX.value) + "px";
+    userBlock.value.style.width = userBlockWidth.value + (e.clientX - lastMouseX.value) + "px";
+    resultBlock.value.style.width = resultBlockWidth.value - (e.clientX - lastMouseX.value) + "px";
   }
 };
 
@@ -167,14 +167,14 @@ const handleMouseup = () => {
 const handleResize = () => {
   if (window.innerWidth >= 768) {
     let resizeDiff = container.value.clientWidth - containerWidth.value;
-    userBlock.value.style.width = (userBlock.value.clientWidth + Math.floor(resizeDiff / 2)) + "px";
-    resultBlock.value.style.width = (container.value.clientWidth - userBlock.value.clientWidth - 2) + "px";
+    userBlock.value.style.width = userBlock.value.clientWidth + Math.floor(resizeDiff / 2) + "px";
+    resultBlock.value.style.width = container.value.clientWidth - userBlock.value.clientWidth - 2 + "px";
     containerWidth.value = container.value.clientWidth;
   } else {
     userBlock.value.style.width = "100%";
     resultBlock.value.style.width = "100%";
   }
-}
+};
 </script>
 
 <template>
@@ -193,32 +193,54 @@ const handleResize = () => {
         <div class="radio-block">
           In quotes("")?
           <!-- Wrap by quotation("")? -->
-          <SwitchCheckbox :isChecked="isQuotationChecked" v-on:switchChecked="switchInQuotes" />
+          <SwitchCheckbox :is-checked="isQuotationChecked" @switch-checked="switchInQuotes" />
         </div>
       </div>
-      <textarea v-focus name="userInput" class="user-json" placeholder="Type here to convert to json tree..."
-                v-model.trim="jsonString"></textarea>
+      <textarea
+        v-focus
+        name="userInput"
+        class="user-json"
+        placeholder="Type here to convert to json tree..."
+        v-model.trim="jsonString"
+      ></textarea>
     </div>
     <div class="result-block" id="result-block" ref="resultBlock">
       <div class="drag-block" id="drag-block" @mousedown="handleMouseDown"></div>
 
       <div class="block-title">
         Result
-        <button class="all-open-control" data-text="Expand All" @click="setIsAllOpen(true)"
-                :disabled="isAllOpen === true"><FontAwesomeIcon :icon="['fas', 'plus']" size="sm" />
+        <button
+          class="all-open-control"
+          data-text="Expand All"
+          @click="setIsAllOpen(true)"
+          :disabled="isAllOpen === true"
+        >
+          <FontAwesomeIcon :icon="['fas', 'plus']" size="sm" />
         </button>
-        <button class="all-open-control" data-text="Collapse All" @click="setIsAllOpen(false)"
-                :disabled="isAllOpen === false"><FontAwesomeIcon :icon="['fas', 'minus']" size="sm" />
+        <button
+          class="all-open-control"
+          data-text="Collapse All"
+          @click="setIsAllOpen(false)"
+          :disabled="isAllOpen === false"
+        >
+          <FontAwesomeIcon :icon="['fas', 'minus']" size="sm" />
         </button>
         <div class="radio-block">
           Parse Unicode?
-          <SwitchCheckbox :isChecked="isUnicodeChecked" v-on:switchChecked="switchUnicode" />
+          <SwitchCheckbox :is-checked="isUnicodeChecked" @switch-checked="switchUnicode" />
         </div>
       </div>
-      <CopiedBlock :content="jsonObj !== undefined ? jsonObj : errorMessage"
-                   :type="jsonObj !== undefined ? 'json' : 'string'">
-        <JsonTree v-if="jsonObj !== undefined" :json="jsonObj" :transUnicode="isUnicodeChecked" :isAllOpen="isAllOpen"
-                  @manualOpen="setIsAllOpen(null)" />
+      <CopiedBlock
+        :content="jsonObj !== undefined ? jsonObj : errorMessage"
+        :type="jsonObj !== undefined ? 'json' : 'string'"
+      >
+        <JsonTree
+          v-if="jsonObj !== undefined"
+          :json="jsonObj"
+          :trans-unicode="isUnicodeChecked"
+          :is-all-open="isAllOpen"
+          @manual-open="setIsAllOpen(null)"
+        />
         <p v-else class="error-message">{{ errorMessage }}</p>
       </CopiedBlock>
     </div>

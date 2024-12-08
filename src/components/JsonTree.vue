@@ -4,8 +4,8 @@ import { ref, computed, watch } from "vue";
 export default {
   name: "JsonTree",
   props: {
-    json: [Array, Object, String, Number, Boolean],
-    objectKey: String,
+    json: { type: [Array, Object, String, Number, Boolean], default: null },
+    objectKey: { type: String, default: null },
     transUnicode: Boolean,
     isAllOpen: Boolean,
   },
@@ -14,11 +14,14 @@ export default {
     const open = ref(true);
     let isAllOpen = ref(props.isAllOpen);
 
-    watch(() => props.isAllOpen, (isAllOpen) => {
-      if (isAllOpen !== null) {
-        open.value = isAllOpen;
-      }
-    });
+    watch(
+      () => props.isAllOpen,
+      (isAllOpen) => {
+        if (isAllOpen !== null) {
+          open.value = isAllOpen;
+        }
+      },
+    );
 
     const manualOpen = () => {
       isAllOpen.value = null;
@@ -51,43 +54,67 @@ export default {
 </script>
 
 <template>
-  <span v-if="props.objectKey" class="object-key" @click.stop="open = !open; manualOpen();">
+  <span
+    v-if="props.objectKey"
+    class="object-key"
+    @click.stop="
+      open = !open;
+      manualOpen();
+    "
+  >
     "{{ props.objectKey }}":
   </span>
   <template v-if="props.json !== null && typeof props.json == 'object'">
     <template v-if="props.json.constructor.name === 'Array'">
-      <span :class="['array-bracket', { close: !open }]" @click.stop="open = !open; manualOpen();">[</span>
+      <span
+        :class="['array-bracket', { close: !open }]"
+        @click.stop="
+          open = !open;
+          manualOpen();
+        "
+        >[
+      </span>
       <span class="count"></span>
       <ul v-show="open">
         <li v-for="(child, key) in props.json" :key="key">
-          <JsonTree :json="child" :transUnicode="props.transUnicode" :isAllOpen="isAllOpen" @manualOpen="manualOpen" />
+          <JsonTree
+            :json="child"
+            :trans-unicode="props.transUnicode"
+            :is-all-open="isAllOpen"
+            @manual-open="manualOpen"
+          />
           <span v-if="props.json.length !== key + 1">, </span>
         </li>
       </ul>
       <span>]</span>
     </template>
     <template v-else>
-      <span :class="['object-bracket', { close: !open }]" @click.stop="open = !open; manualOpen();">{</span>
+      <span
+        :class="['object-bracket', { close: !open }]"
+        @click.stop="
+          open = !open;
+          manualOpen();
+        "
+        >{
+      </span>
       <span class="count"></span>
       <ul v-show="open">
         <li v-for="(child, key) in props.json" :key="key">
           <JsonTree
-            :objectKey="key"
+            :object-key="key"
             :json="child"
-            :transUnicode="props.transUnicode"
-            :isAllOpen="isAllOpen"
-            @manualOpen="manualOpen"
+            :trans-unicode="props.transUnicode"
+            :is-all-open="isAllOpen"
+            @manual-open="manualOpen"
           />
-          <span v-if="key !== Object.keys(props.json)[Object.keys(props.json).length - 1]">,
-          </span>
+          <span v-if="key !== Object.keys(props.json)[Object.keys(props.json).length - 1]">, </span>
         </li>
       </ul>
       <span>}</span>
     </template>
   </template>
   <template v-else>
-    <span v-if="typeof props.json === 'string'" :class="typeof props.json">"{{ props.json }}"
-    </span>
+    <span v-if="typeof props.json === 'string'" :class="typeof props.json">"{{ props.json }}" </span>
     <span v-else-if="typeof props.json === 'object'" class="null">null</span>
     <span v-else :class="typeof props.json">{{ props.json }}</span>
   </template>

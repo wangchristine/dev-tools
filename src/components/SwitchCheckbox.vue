@@ -10,7 +10,7 @@ const props = defineProps({
     type: [Boolean],
     required: false,
     default: false,
-  }
+  },
 });
 const emit = defineEmits(["switchChecked"]);
 
@@ -26,7 +26,7 @@ const toggleCheckbox = () => {
 </script>
 
 <template>
-  <input type="checkbox" ref="checkbox" :checked="props.isChecked"/>
+  <input type="checkbox" ref="checkbox" :checked="props.isChecked" />
   <label class="switchToggle" @click="toggleCheckbox"> </label>
 </template>
 

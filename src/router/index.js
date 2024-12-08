@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomeView from "../views/HomeView.vue";
-import JsonView from "../views/JsonView.vue";
 import EncodeDecodeView from "../views/EncodeDecodeView.vue";
 import ErrorView from "../views/ErrorView.vue";
+import HomeView from "../views/HomeView.vue";
 import ImageEditorView from "../views/ImageEditorView.vue";
+import JsonView from "../views/JsonView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
