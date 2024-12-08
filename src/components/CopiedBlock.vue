@@ -5,6 +5,7 @@ const props = defineProps({
   content: {
     type: [String, Number, Boolean, Array, Object],
     required: false,
+    default: null,
   },
   type: {
     // content type: json, string
@@ -25,9 +26,7 @@ const copyToClipboard = () => {
     if (props.type === "string") {
       clipboardText.value = props.content;
     } else {
-      clipboardText.value = JSON.stringify(props.content, null, 2)
-        .replace(/\\"/g, '"')
-        .replaceAll(/\\\\/g, "\\");
+      clipboardText.value = JSON.stringify(props.content, null, 2).replace(/\\"/g, '"').replaceAll(/\\\\/g, "\\");
     }
   }
 
@@ -58,7 +57,7 @@ onUnmounted(() => {
       <slot></slot>
     </div>
     <button class="copy" ref="copy" @click="copyToClipboard()">
-      {{ copyText }} 
+      {{ copyText }}
       <FontAwesomeIcon :icon="['fas', 'file']" />
     </button>
   </div>

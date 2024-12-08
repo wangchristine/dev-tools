@@ -16,16 +16,14 @@ watch(
     userString.value = "";
     switch (type) {
       case "base64":
-        typeDescription.value =
-          "This base64 tool can be deal with ASCII and Unicode.";
+        typeDescription.value = "This base64 tool can be deal with ASCII and Unicode.";
         break;
       case "url":
-        typeDescription.value =
-          "This url tool will convert all characters except: A-Z a-z 0-9 - _ . ! ~ * ' ()";
+        typeDescription.value = "This url tool will convert all characters except: A-Z a-z 0-9 - _ . ! ~ * ' ()";
         break;
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(userString, (userInput) => {
@@ -34,12 +32,9 @@ watch(userString, (userInput) => {
       case "base64":
         if (selectedMethod.value === "encode") {
           resultString.value = btoa(
-            encodeURIComponent(userInput).replace(
-              /%([0-9A-F]{2})/g,
-              function toSolidBytes(match, p1) {
-                return String.fromCharCode("0x" + p1);
-              }
-            )
+            encodeURIComponent(userInput).replace(/%([0-9A-F]{2})/g, function toSolidBytes(match, p1) {
+              return String.fromCharCode("0x" + p1);
+            }),
           );
         } else {
           resultString.value = decodeURIComponent(
@@ -48,7 +43,7 @@ watch(userString, (userInput) => {
               .map(function (c) {
                 return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
               })
-              .join("")
+              .join(""),
           );
         }
         break;
@@ -73,24 +68,9 @@ watch(userString, (userInput) => {
       <p>Please select one item of each block.</p>
       <div class="list-block">
         <p>Type</p>
-        <input
-          type="radio"
-          class="radio"
-          name="type"
-          id="type-base64"
-          value="base64"
-          v-model="selectedType"
-          checked
-        />
+        <input type="radio" class="radio" name="type" id="type-base64" value="base64" v-model="selectedType" checked />
         <label for="type-base64">base64</label>
-        <input
-          type="radio"
-          class="radio"
-          name="type"
-          id="type-url"
-          value="url"
-          v-model="selectedType"
-        />
+        <input type="radio" class="radio" name="type" id="type-url" value="url" v-model="selectedType" />
         <label for="type-url">url</label>
 
         <p>Encode/Decode</p>
@@ -104,14 +84,7 @@ watch(userString, (userInput) => {
           checked
         />
         <label for="method-encode">encode</label>
-        <input
-          type="radio"
-          class="radio"
-          name="method"
-          id="method-decode"
-          value="decode"
-          v-model="selectedMethod"
-        />
+        <input type="radio" class="radio" name="method" id="method-decode" value="decode" v-model="selectedMethod" />
         <label for="method-decode">decode</label>
       </div>
       <div class="detail-block">
@@ -132,10 +105,7 @@ watch(userString, (userInput) => {
       </div>
       <div class="result-block" id="result-block" ref="resultBlock">
         <p class="block-title">Result</p>
-        <CopiedBlock
-          :content="errorMessage === '' ? resultString : errorMessage"
-          type="string"
-        >
+        <CopiedBlock :content="errorMessage === '' ? resultString : errorMessage" type="string">
           <p v-if="errorMessage === ''">{{ resultString }}</p>
           <p v-else class="error-message">{{ errorMessage }}</p>
         </CopiedBlock>

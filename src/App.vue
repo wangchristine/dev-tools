@@ -13,9 +13,12 @@ onMounted(() => {
   }
 });
 
-watch(() => route.name, () => {
-  toolLink.value.style.display = "";
-});
+watch(
+  () => route.name,
+  () => {
+    toolLink.value.style.display = "";
+  },
+);
 
 const switchTheme = () => {
   if (localStorage.getItem("theme") === "dark") {
@@ -45,12 +48,11 @@ const toggleBurger = () => {
     toolLink.value.style.display = "";
   }
 };
-
 </script>
 
 <template>
   <header>
-    <RouterLink class="brand-title" :to="{ name: 'home' }">Dev Tools</RouterLink>
+    <RouterLink class="brand-title" :to="{ name: 'home' }"> Dev Tools </RouterLink>
     <nav class="tool-link" ref="toolLink">
       <RouterLink :to="{ name: 'home' }">Home</RouterLink>
       <RouterLink :to="{ name: 'json' }">Json Parser</RouterLink>
@@ -60,11 +62,11 @@ const toggleBurger = () => {
     <button class="burger" @click="toggleBurger">≡</button>
     <div class="header-right">
       <a href="https://github.com/wangchristine/dev-tools" target="_blank" class="github-icon">
-        <img v-if="currentTheme == 'dark'" src="@/assets/github-mark-white.png" alt="github" class="github-dark">
-        <img v-else src="@/assets/github.png" alt="github" class="github-light">
+        <img v-if="currentTheme == 'dark'" src="@/assets/github-mark-white.png" alt="github" class="github-dark" />
+        <img v-else src="@/assets/github.png" alt="github" class="github-light" />
       </a>
       <button name="theme" class="theme" @click="switchTheme">
-        <FontAwesomeIcon :icon="['fas', (currentTheme == 'dark' ? 'sun' : 'moon')]" size="lg" />
+        <FontAwesomeIcon :icon="['fas', currentTheme == 'dark' ? 'sun' : 'moon']" size="lg" />
       </button>
     </div>
   </header>
@@ -165,7 +167,7 @@ header .header-right {
   width: 28px;
   border-radius: 50%;
   padding: 0;
-  border: 0;
+  border: solid 1px var(--color-text);
 }
 
 .theme svg {

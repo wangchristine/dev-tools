@@ -1,9 +1,8 @@
 <script setup>
-
 const props = defineProps({
   value: {
     type: [Number],
-    required: true
+    required: true,
   },
   min: {
     type: [Number],
@@ -40,8 +39,15 @@ const slideRangeInputEvent = (e) => {
     <div class="range">
       <span class="min">{{ props.min }}</span>
       <span class="max">{{ props.max }}</span>
-      <input type="range" :min="props.min" :max="props.max" :value="props.value" :step="props.step"
-             :disabled="props.disable" @input="slideRangeInputEvent">
+      <input
+        type="range"
+        :min="props.min"
+        :max="props.max"
+        :value="props.value"
+        :step="props.step"
+        :disabled="props.disable"
+        @input="slideRangeInputEvent"
+      />
     </div>
     <span class="valueText">{{ props.value }}</span>
   </div>
@@ -64,7 +70,7 @@ const slideRangeInputEvent = (e) => {
   right: 0;
 }
 
-input[type=range] {
+input[type="range"] {
   appearance: none;
   background: #b5b5b5;
   width: 100%;
@@ -72,7 +78,7 @@ input[type=range] {
   border-radius: 5px;
 }
 
-input[type=range]::-webkit-slider-thumb {
+input[type="range"]::-webkit-slider-thumb {
   appearance: none;
   background: var(--color-main-theme);
   border-radius: 50%;
@@ -80,7 +86,7 @@ input[type=range]::-webkit-slider-thumb {
   height: 20px;
 }
 
-input[type=range]::-moz-range-thumb {
+input[type="range"]::-moz-range-thumb {
   appearance: none;
   background: var(--color-main-theme);
   border-radius: 50%;

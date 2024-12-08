@@ -18,5 +18,4 @@ Go to [Dev Tools](https://wangchristine.github.io/dev-tools/) and have fun!
 
 (Alphabetical order)
 
-Alice, Helio, Kris, Tommy 
-
+Alice, Helio, Kris, Tommy
