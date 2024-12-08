@@ -165,7 +165,7 @@ header .header-right {
   width: 28px;
   border-radius: 50%;
   padding: 0;
-  border: 0;
+  border: solid 1px var(--color-text);
 }
 
 .theme svg {
