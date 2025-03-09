@@ -31,8 +31,12 @@ jobs:
       # Runs a single command using the runners shell
       - name: NPM Install
         run: |
-          npm install
+          npm ci
 
       - name: Lint
         run: |
           npm run lint
+
+      - name: Build
+        run: |
+          npm run build
