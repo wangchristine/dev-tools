@@ -10,12 +10,12 @@
   "packageRules": [
     {
       "groupName": "Vue Core Dependencies",
-      "schedule": ["before 5:00am"],
+      "schedule": ["0 1 * * 4"],
       "matchPackageNames": ["vue", "nuxt", "vite"]
     },
     {
       "groupName": "Vue Ecosystem Dependencies",
-      "schedule": ["* 0-3 * * 4"],
+      "schedule": ["0 1 1 * *"],
       "matchPackageNames": ["/^(?:@)?vue.+/", "/^(?:@)?nuxt.+/", "/^(?:@)?vite.+/", "pinia"]
     }
   ],
