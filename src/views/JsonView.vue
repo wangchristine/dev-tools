@@ -133,6 +133,7 @@ let resultBlockWidth = ref(0);
 
 const handleMouseDown = (e) => {
   console.log("down");
+  e.preventDefault();
 
   isDragging.value = true;
   lastMouseX.value = e.clientX;
@@ -168,7 +169,7 @@ const handleResize = () => {
   if (window.innerWidth >= 768) {
     let resizeDiff = container.value.clientWidth - containerWidth.value;
     userBlock.value.style.width = userBlock.value.clientWidth + Math.floor(resizeDiff / 2) + "px";
-    resultBlock.value.style.width = container.value.clientWidth - userBlock.value.clientWidth - 2 + "px";
+    resultBlock.value.style.width = container.value.clientWidth - userBlock.value.clientWidth - 12 + "px";
     containerWidth.value = container.value.clientWidth;
   } else {
     userBlock.value.style.width = "100%";
@@ -206,9 +207,11 @@ const handleResize = () => {
         v-model.trim="jsonString"
       ></textarea>
     </div>
-    <div class="result-block" id="result-block" ref="resultBlock">
-      <div class="drag-block" id="drag-block" @mousedown="handleMouseDown"></div>
+    <div class="drag-block" id="drag-block" @mousedown="handleMouseDown">
+      <FontAwesomeIcon :icon="['fa', 'grip-vertical']" size="sm" />
+    </div>
 
+    <div class="result-block" id="result-block" ref="resultBlock">
       <div class="title-block">
         <div class="title">Result</div>
         <div class="action">
@@ -263,24 +266,19 @@ const handleResize = () => {
   min-width: 270px;
 }
 
-.result-block {
-  width: calc(55% - 2px);
-  min-width: 270px;
-}
-
 .drag-block {
-  position: absolute;
-  left: -4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   height: 100%;
-  width: 4px;
-  background-color: transparent;
+  width: 12px;
   z-index: 3;
   cursor: col-resize;
 }
 
-.drag-block:hover {
-  border: solid #b7b7b7;
-  border-width: 0 3px;
+.result-block {
+  width: calc(55% - 12px);
+  min-width: 270px;
 }
 
 .title-block {
