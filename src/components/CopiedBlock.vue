@@ -66,8 +66,8 @@ onUnmounted(() => {
 <style scoped>
 .result-div {
   color: var(--color-block-text3);
-  border: black 1px solid;
-  height: calc(100% - 60px);
+  border: var(--color-block-text1) 1px solid;
+  height: calc(100% - 40px);
   background-color: var(--color-block-background1);
   min-height: 100px;
 }

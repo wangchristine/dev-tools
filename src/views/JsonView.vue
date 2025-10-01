@@ -180,20 +180,22 @@ const handleResize = () => {
 <template>
   <div class="container" ref="container">
     <div class="user-block" id="user-block" ref="userBlock">
-      <div class="block-title">
-        Input
-        <select name="example" class="example" @change="selectExample($event)">
-          <option value="0" selected>Examples..</option>
-          <option value="1">Data types</option>
-          <option value="2">GCP log</option>
-          <option value="3">Multi-level</option>
-          <option value="4">Json string</option>
-          <option value="5">Unicode</option>
-        </select>
-        <div class="radio-block">
-          In quotes("")?
-          <!-- Wrap by quotation("")? -->
-          <SwitchCheckbox :is-checked="isQuotationChecked" @switch-checked="switchInQuotes" />
+      <div class="title-block">
+        <div class="title">Input</div>
+        <div class="action">
+          <select name="example" class="example" @change="selectExample($event)">
+            <option value="0" selected>-Examples-</option>
+            <option value="1">Data types</option>
+            <option value="2">GCP log</option>
+            <option value="3">Multi-level</option>
+            <option value="4">Json string</option>
+            <option value="5">Unicode</option>
+          </select>
+          <div class="radio-block">
+            <div class="title">In quotes("")?</div>
+            <!-- Wrap by quotation("")? -->
+            <SwitchCheckbox :is-checked="isQuotationChecked" @switch-checked="switchInQuotes" />
+          </div>
         </div>
       </div>
       <textarea
@@ -207,27 +209,29 @@ const handleResize = () => {
     <div class="result-block" id="result-block" ref="resultBlock">
       <div class="drag-block" id="drag-block" @mousedown="handleMouseDown"></div>
 
-      <div class="block-title">
-        Result
-        <button
-          class="all-open-control"
-          data-text="Expand All"
-          @click="setIsAllOpen(true)"
-          :disabled="isAllOpen === true"
-        >
-          <FontAwesomeIcon :icon="['fas', 'plus']" size="sm" />
-        </button>
-        <button
-          class="all-open-control"
-          data-text="Collapse All"
-          @click="setIsAllOpen(false)"
-          :disabled="isAllOpen === false"
-        >
-          <FontAwesomeIcon :icon="['fas', 'minus']" size="sm" />
-        </button>
-        <div class="radio-block">
-          Parse Unicode?
-          <SwitchCheckbox :is-checked="isUnicodeChecked" @switch-checked="switchUnicode" />
+      <div class="title-block">
+        <div class="title">Result</div>
+        <div class="action">
+          <button
+            class="all-open-control"
+            data-text="Expand All"
+            @click="setIsAllOpen(true)"
+            :disabled="isAllOpen === true"
+          >
+            <FontAwesomeIcon :icon="['fas', 'plus']" size="sm" />
+          </button>
+          <button
+            class="all-open-control"
+            data-text="Collapse All"
+            @click="setIsAllOpen(false)"
+            :disabled="isAllOpen === false"
+          >
+            <FontAwesomeIcon :icon="['fas', 'minus']" size="sm" />
+          </button>
+          <div class="radio-block">
+            <div class="title">Parse Unicode?</div>
+            <SwitchCheckbox :is-checked="isUnicodeChecked" @switch-checked="switchUnicode" />
+          </div>
         </div>
       </div>
       <CopiedBlock
@@ -256,12 +260,12 @@ const handleResize = () => {
 
 .user-block {
   width: 45%;
-  min-width: 170px;
+  min-width: 270px;
 }
 
 .result-block {
   width: calc(55% - 2px);
-  min-width: 175px;
+  min-width: 270px;
 }
 
 .drag-block {
@@ -279,19 +283,44 @@ const handleResize = () => {
   border-width: 0 3px;
 }
 
-.block-title {
-  padding: 0 10px;
+.title-block {
+  display: flex;
+  align-items: center;
   font-size: 20px;
-  text-align: center;
-  height: 60px;
+  height: 40px;
+  width: 100%;
+  border: var(--color-block-text1) 1px solid;
+  background-color: var(--color-block-background2);
 }
 
-.block-title .example {
+.title-block > .title {
+  padding: 0 10px;
+  border-right: solid 1px;
+}
+
+.title-block .action {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 5px;
+  width: 100%;
+  height: 100%;
+}
+
+.title-block .action .example {
   padding: 2px 0;
+  border-radius: 3px;
+  max-width: 95px;
 }
 
-.block-title .radio-block {
+.title-block .action .radio-block {
   font-size: 16px;
+  line-height: 1;
+  text-align: center;
+}
+
+.title-block .action .radio-block > .title {
+  font-size: 14px;
 }
 
 .all-open-control {
@@ -324,22 +353,15 @@ const handleResize = () => {
 
 .user-json {
   padding: 10px;
-  border: black 1px solid;
+  border: var(--color-block-text1) 1px solid;
   width: 100%;
-  height: calc(100% - 60px);
+  height: calc(100% - 40px);
   min-height: 100px;
   overflow-y: auto;
   resize: none;
   font-size: 16px;
   background-color: var(--color-block-background1);
   color: var(--color-block-text1);
-}
-
-.result-json {
-  color: var(--color-block-text3);
-  border: black 1px solid;
-  height: calc(100% - 60px);
-  background-color: var(--color-block-background1);
 }
 
 .tree-json {
