@@ -67,13 +67,13 @@ watch(userString, (userInput) => {
     <div class="select-block">
       <p>Please select one item of each block.</p>
       <div class="list-block">
-        <p>Type</p>
+        <p>1. Type</p>
         <input type="radio" class="radio" name="type" id="type-base64" value="base64" v-model="selectedType" checked />
         <label for="type-base64">base64</label>
         <input type="radio" class="radio" name="type" id="type-url" value="url" v-model="selectedType" />
         <label for="type-url">url</label>
 
-        <p>Encode/Decode</p>
+        <p>2. Encode/Decode</p>
         <input
           type="radio"
           class="radio"
@@ -123,7 +123,6 @@ watch(userString, (userInput) => {
 
 .select-block {
   width: 300px;
-  margin: 30px 10px 0 0;
   padding: 10px;
 }
 
@@ -171,14 +170,15 @@ watch(userString, (userInput) => {
 }
 
 .block-title {
-  padding: 10px;
   font-size: 20px;
   text-align: center;
+  border: var(--color-block-text1) 1px solid;
+  background-color: var(--color-block-background2);
 }
 
 .user-string {
   padding: 10px;
-  border: black 1px solid;
+  border: var(--color-block-text1) 1px solid;
   width: 100%;
   height: calc(100% - 52px);
   min-height: 100px;

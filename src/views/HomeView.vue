@@ -24,6 +24,7 @@
       <div class="description">Special thanks in alphabetical order</div>
       <div class="log">
         <ul>
+          <li>[Oct 1, 2025] Change Json Parser and Encode & Decode style.</li>
           <li>[Dec 6, 2024] Change all icons style.</li>
           <li>[Sep 29, 2024] Change GitHub link style.</li>
           <li>[Apr 23, 2023] Image Editor can handle multiple images and download by zip.</li>

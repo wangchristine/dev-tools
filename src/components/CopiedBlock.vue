@@ -15,10 +15,9 @@ const props = defineProps({
   },
 });
 
-let copyText = ref("Copy");
+const isCopied = ref(false);
 let timer = null;
-// DOM
-const copy = ref(null);
+
 const copyToClipboard = () => {
   clearTimeout(timer);
   let clipboardText = ref("");
@@ -33,12 +32,10 @@ const copyToClipboard = () => {
   navigator.clipboard
     .writeText(clipboardText.value)
     .then(() => {
-      copyText.value = "Copied!";
-      copy.value.style.backgroundColor = "#ed6b6b";
+      isCopied.value = true;
       console.log("Copied to clipboard.");
       timer = setTimeout(() => {
-        copyText.value = "Copy";
-        copy.value.style.backgroundColor = "#bb8e8e";
+        isCopied.value = false;
       }, 1000);
     })
     .catch((err) => {
@@ -57,8 +54,9 @@ onUnmounted(() => {
       <slot></slot>
     </div>
     <button class="copy" ref="copy" @click="copyToClipboard()">
-      {{ copyText }}
-      <FontAwesomeIcon :icon="['fas', 'file']" />
+      {{ isCopied ? "Copied!" : "Copy" }}
+      <FontAwesomeIcon v-if="isCopied" :icon="['fas', 'check']" />
+      <FontAwesomeIcon v-else :icon="['fas', 'file']" />
     </button>
   </div>
 </template>
@@ -84,7 +82,7 @@ onUnmounted(() => {
   position: absolute;
   top: 12px;
   right: 20px;
-  background-color: #bb8e8e;
+  background-color: var(--color-main-theme);
   color: white;
   border: 0;
   border-radius: 5px;
@@ -96,6 +94,6 @@ onUnmounted(() => {
 }
 
 .result-div:hover > .copy {
-  opacity: 1;
+  opacity: 0.9;
 }
 </style>
