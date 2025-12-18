@@ -17,7 +17,7 @@
     "@fortawesome/vue-fontawesome": "^3.1.2",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.1",
-    "vue": "^3.5.24",
+    "vue": "^3.5.26",
     "vue-router": "^4.6.3"
   },
   "devDependencies": {
@@ -34,7 +34,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.6.2",
-    "vite": "^6.2.4",
+    "vite": "^6.4.1",
     "vite-plugin-vue-devtools": "^7.7.9"
   }
 }
