@@ -148,6 +148,7 @@ const uploadImage = (event) => {
       uploadError.value = true;
     });
 };
+
 const selectImage = (idx) => {
   imageSelected.value = idx;
 
@@ -166,10 +167,12 @@ const selectImage = (idx) => {
     }
   }
 };
+
 const rotateImage = (rotateDeg) => {
   imageRotate.value = (imageRotate.value + rotateDeg) % 360;
   renderCanvas();
 };
+
 const downloadImage = () => {
   if (imagesOrigin.value.length > 1) {
     const zip = new JSZip();
@@ -468,472 +471,518 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="container">
-    <div class="image-block">
-      <p class="title">Upload Image</p>
-      <label class="upload-file" v-if="imagesOrigin === null">
-        <div class="upload-block">
-          <div class="icon">
-            <FontAwesomeIcon :icon="['fas', 'folder-open']" />
+  <div class="tool-container image-editor">
+    <div class="main-layout">
+      <div class="canvas-section">
+        <label class="upload-area" v-if="imagesOrigin === null">
+          <div class="upload-content">
+            <font-awesome-icon :icon="['fas', 'cloud-arrow-up']" class="upload-icon" />
+            <h3>Upload Image</h3>
+            <p>Try drag images here. Upload up to 20 images.</p>
+            <div class="error-hint" v-if="uploadError">Upload Failed. Max 20 files.</div>
           </div>
-          <div class="text">Upload an image file or drag it here...</div>
-          <div class="error" v-if="uploadError">
-            Upload Failed. Please upload the correct image files and maximum number of files is 20.
+          <input type="file" accept="image/*" @change="uploadImage" multiple class="hidden-input" />
+        </label>
+        <div class="preview-viewport" v-else>
+          <div class="canvas-container">
+            <canvas ref="canvas" width="800" height="500"></canvas>
+            <button class="reset-fab" @click="resetImage" title="Clear images">
+              <font-awesome-icon :icon="['fas', 'xmark']" />
+            </button>
+          </div>
+          <div class="thumbnail-strip" v-if="images.length > 1">
+            <div class="strip-header">Images {{ imageSelected + 1 }} of {{ images.length }}</div>
+            <div class="thumb-list">
+              <div
+                v-for="(img, key) in images"
+                :key="img?.src"
+                @click="selectImage(key)"
+                :class="['thumb-box', { active: key === imageSelected }]"
+              >
+                <img :src="img?.src" />
+              </div>
+            </div>
           </div>
         </div>
-        <input type="file" name="userImage" id="userImage" accept="image/*" @change="uploadImage" multiple />
-      </label>
-      <div class="preview-block" v-else>
-        <canvas ref="canvas" id="canvas" class="preview-image" width="800" height="500"></canvas>
-        <span class="reset-image" @click="resetImage"><FontAwesomeIcon :icon="['fas', 'xmark']" size="xl" /></span>
-      </div>
-      <div class="multi-preview-block" v-if="images.length > 1">
-        <p>Images {{ imageSelected + 1 }} of {{ images.length }}</p>
-        <div class="images">
-          <a v-for="(image, key) in images" :key="image?.src" @click="selectImage(key)">
-            <img :src="image?.src" :class="{ selected: key === imageSelected }" />
-          </a>
+        <div class="quick-tools" v-if="imagesOrigin !== null && uploadError === false">
+          <button class="tool-btn" @click="rotateImage(90)">
+            <font-awesome-icon :icon="['fas', 'arrow-rotate-left']" flip="vertical" /> 順時針 90°
+          </button>
+          <button class="tool-btn" @click="rotateImage(-90)">
+            <font-awesome-icon :icon="['fas', 'arrow-rotate-right']" flip="vertical" /> 逆時針 90°
+          </button>
         </div>
       </div>
-      <div class="tools-block" v-if="imagesOrigin !== null && uploadError === false">
-        <button @click="rotateImage(90)">
-          <FontAwesomeIcon :icon="['fas', 'arrow-rotate-left']" flip="vertical" />
-          順時針旋轉 90%
-        </button>
-        <button @click="rotateImage(-90)">
-          <FontAwesomeIcon :icon="['fas', 'arrow-rotate-right']" flip="vertical" />
-          逆時針旋轉 90%
-        </button>
-      </div>
-    </div>
-    <div class="information-block">
-      <div class="origin">
-        <p>
-          Name:
-          <span v-if="imagesOrigin !== null">{{ imagesOrigin.item(imageSelected).name }}</span>
-        </p>
-        <p>
-          Image type:
-          <span v-if="imagesOrigin !== null">{{ imagesOrigin.item(imageSelected).type }}</span>
-        </p>
-        <p>
-          Origin size:
-          <span v-if="imagesOrigin !== null">
-            {{ Math.round((imagesOrigin.item(imageSelected).size / 1024) * 100) / 100 }}
-            KB ({{ imagesOrigin.item(imageSelected).size }} Bytes)
-          </span>
-        </p>
-        <p>
-          Origin resolution:
-          <span v-if="images.length !== 0"
-            >{{ images[imageSelected]?.width }} * {{ images[imageSelected]?.height }}
-          </span>
-        </p>
-      </div>
-      <div class="draw-tool">
-        <div class="title">Tools</div>
-        <div class="resize">
-          <input
-            type="checkbox"
-            class="checkbox"
-            ref="resize"
-            id="resize"
-            :checked="needResize"
-            @change="switchResize"
-            disabled
-          />
-          <label for="resize"> Resize</label>
-          <div class="tools">
-            <div>
-              Type:
-              <SwitchCheckbox
-                :is-checked="resizeType === 'percent' ? false : true"
-                :disable="images.length !== 1 || needResize === false"
-                @switch-checked="switchResizeType"
-              />
-              <span v-if="resizeType === 'percent'"> Percent(%)</span>
-              <span v-if="resizeType === 'pixel'"> Pixel(px)</span>
 
-              <p v-if="images.length > 1" class="hint">
-                <FontAwesomeIcon :icon="['fas', 'lightbulb']" /> Multi images only allow percent.
-              </p>
-            </div>
-            <div>
-              Width:
-              <input
-                type="number"
-                v-model.number="resizeWidth"
-                ref="inputWidth"
-                min="1"
-                step="1"
-                :onkeypress="limitInputNumber"
-                @input="inputWidthInputEvent"
-                disabled
-              />
-              Height:
-              <input
-                type="number"
-                v-model.number="resizeHeight"
-                ref="inputHeight"
-                min="1"
-                step="1"
-                :onkeypress="limitInputNumber"
-                @input="inputHeightInputEvent"
-                disabled
-              />
-            </div>
+      <aside class="sidebar-panel">
+        <div class="card info-card">
+          <div class="card-title">Image Info</div>
+          <div class="info-row">
+            <span>Name:</span>
+            <strong v-if="imagesOrigin !== null">
+              {{ imagesOrigin.item(imageSelected).name }}
+            </strong>
+          </div>
+          <div class="info-row">
+            <span>Image Type:</span>
+            <strong v-if="imagesOrigin !== null">
+              {{ imagesOrigin.item(imageSelected).type }}
+            </strong>
+          </div>
+          <div class="info-row">
+            <span>Origin Size:</span>
+            <strong v-if="imagesOrigin !== null">
+              {{ Math.round((imagesOrigin.item(imageSelected).size / 1024) * 100) / 100 }}
+              KB ({{ imagesOrigin.item(imageSelected).size }}
+              Bytes)
+            </strong>
+          </div>
+          <div class="info-row">
+            <span>Origin Resolution:</span>
+            <strong v-if="images.length !== 0">
+              {{ images[imageSelected]?.width }} * {{ images[imageSelected]?.height }}
+            </strong>
           </div>
         </div>
-        <div class="watermark">
-          <input
-            type="checkbox"
-            class="checkbox"
-            ref="watermark"
-            id="watermark"
-            :checked="needWatermark"
-            @change="switchWatermark"
-            disabled
-          />
-          <label for="watermark"> Watermark</label>
-          <div class="tools">
-            <div>
-              Text:
+        <div class="card settings-card">
+          <div class="card-title">Editor Tools</div>
+          <div class="setting-group">
+            <div class="group-header">
+              <input type="checkbox" ref="resize" id="resize" :checked="needResize" @change="switchResize" disabled />
+              <label for="resize">Resize</label>
+            </div>
+            <div class="group-content">
+              <div class="flex-between">
+                <span>Type:</span>
+                <SwitchCheckbox
+                  :is-checked="resizeType === 'percent' ? false : true"
+                  :disable="images.length !== 1 || needResize === false"
+                  @switch-checked="switchResizeType"
+                />
+                <span class="small-text">
+                  {{ resizeType === "percent" ? "Percent(%)" : "Pixel(px)" }}
+                </span>
+                <p v-if="images.length > 1" class="hint-text">
+                  <FontAwesomeIcon :icon="['fas', 'lightbulb']" /> Multi images only allow percent.
+                </p>
+              </div>
+              <div class="input-pair">
+                <div class="field">
+                  Width:
+                  <input
+                    type="number"
+                    v-model.number="resizeWidth"
+                    ref="inputWidth"
+                    min="1"
+                    step="1"
+                    :onkeypress="limitInputNumber"
+                    @input="inputWidthInputEvent"
+                    disabled
+                  />
+                </div>
+                <div class="field">
+                  Height:
+                  <input
+                    type="number"
+                    v-model.number="resizeHeight"
+                    ref="inputHeight"
+                    min="1"
+                    step="1"
+                    :onkeypress="limitInputNumber"
+                    @input="inputHeightInputEvent"
+                    disabled
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="setting-group">
+            <div class="group-header">
+              <input
+                type="checkbox"
+                ref="watermark"
+                id="watermark"
+                :checked="needWatermark"
+                @change="switchWatermark"
+                disabled
+              />
+              <label for="watermark">Watermark</label>
+            </div>
+            <div class="group-content">
+              <label for="watermark-text">Text:</label>
               <input
                 type="text"
+                id="watermark-text"
                 v-model.trim="watermarkText"
                 ref="inputWatermarkText"
                 @input="inputWatermarkTextInputEvent"
+                placeholder="Type..."
+                class="full-input"
                 disabled
               />
-            </div>
-            <div>
-              Size:
-              <RangeSlider
-                :value="watermarkSize"
-                :min="12"
-                :max="72"
-                :disable="images.length === 0 || needWatermark === false"
-                @slide-range="slideWatermarkSize"
-              />
+              <div class="slider-row">
+                <label>Size: {{ watermarkSize }}</label>
+                <RangeSlider
+                  :value="watermarkSize"
+                  :min="12"
+                  :max="72"
+                  :disable="images.length === 0 || needWatermark === false"
+                  @slide-range="slideWatermarkSize"
+                />
+              </div>
             </div>
           </div>
         </div>
-        <div class="final-block">
-          Download type:
-          <p>(Possibly download .png file because of not supported by certain browsers.)</p>
-          <div class="tools">
-            <div class="image-type">
-              <template v-for="(imageType, key) in imageTypes" :key="key">
+        <div class="card download-card">
+          <div class="card-title">Export Files</div>
+          <p>Possibly download .png file because of not supported by certain browsers.</p>
+          <div class="type-selector">
+            <template v-for="(imageType, key) in imageTypes" :key="key">
+              <label class="radio-label" :class="{ active: downloadImageType === imageType.name }">
                 <input
                   type="radio"
                   name="imageType"
-                  :id="imageType.name"
                   :value="imageType.name"
                   v-model="downloadImageType"
-                  :checked="key === 0"
                   @change="imageTypeChangeEvent"
                 />
-                <label class="text" :for="imageType.name">{{ imageType.name.toUpperCase() }}</label>
-              </template>
-              <span class="divider"></span>
+                {{ imageType.name.toUpperCase() }}
+              </label>
+            </template>
+            <label class="radio-label" :class="{ active: downloadImageType === 'base64' }">
               <input
                 type="radio"
                 name="imageType"
-                id="base64"
                 value="base64"
                 v-model="downloadImageType"
                 @change="imageTypeChangeEvent"
               />
-              <label class="text" for="base64">BASE64 FILE</label>
-            </div>
+              BASE64 FILE
+            </label>
           </div>
-          <template
+          <div
+            class="quality-row"
             v-if="
               downloadImageType === 'jpg' ||
-              (imagesOrigin !== null &&
-                downloadImageType === 'base64' &&
-                imagesOrigin.item(imageSelected).type === 'image/jpeg')
+              (imagesOrigin && downloadImageType === 'base64' && imagesOrigin.item(imageSelected).type === 'image/jpeg')
             "
           >
-            Select image quality:
-            <div class="tools">
-              <RangeSlider
-                :value="downloadImageQuality"
-                :min="10"
-                :max="100"
-                :step="10"
-                @slide-range="slideImageQuality"
-              />
-            </div>
-          </template>
-          Expect size:
-          <span v-if="expectImageSize !== null">
-            {{ Math.round((expectImageSize / 1024) * 100) / 100 }} KB ({{ expectImageSize }}
+            <label>Select image quality: {{ downloadImageQuality }}</label>
+            <RangeSlider
+              :value="downloadImageQuality"
+              :min="10"
+              :max="100"
+              :step="10"
+              @slide-range="slideImageQuality"
+            />
+          </div>
+          <div class="expect-info" v-if="expectImageSize">
+            Expect Size:
+            <strong>{{ Math.round((expectImageSize / 1024) * 100) / 100 }} KB</strong> ({{ expectImageSize }}
             Bytes)
-          </span>
+          </div>
+          <button ref="download" class="download-btn" @click="downloadImage" disabled>
+            <font-awesome-icon :icon="['fas', 'download']" /> Download {{ images.length > 1 ? "Zip" : "" }}
+          </button>
         </div>
-        <button ref="download" name="download" class="download" @click="downloadImage" disabled>
-          Download <template v-if="images.length > 1">Zip</template>
-        </button>
-      </div>
+      </aside>
     </div>
   </div>
 </template>
 
 <style scoped>
-.container {
+.tool-container.image-editor {
   display: flex;
-  justify-content: space-around;
-}
-
-.image-block {
-  width: 65%;
-}
-
-.image-block .title {
-  padding: 10px;
-  font-size: 20px;
-  text-align: center;
-}
-
-.upload-file {
-  display: block;
-  width: 100%;
-  height: 500px;
-  background-color: var(--color-block-background2);
-  text-align: center;
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.upload-file .upload-block {
-  border: dashed 2px;
-  padding: 160px 40px;
+  flex-direction: column;
   height: 100%;
 }
 
-.upload-block .icon {
-  font-size: 48px;
-  color: #bea545;
+.main-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
 }
 
-.upload-block .text {
-  padding: 10px 10px 30px 10px;
-  font-size: 18px;
-}
-
-.upload-block .error {
-  font-size: 20px;
-  color: #ff6868;
-}
-
-.upload-file input[type="file"] {
-  opacity: 0;
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-}
-
-.preview-block {
+/* --- 左側區 --- */
+.canvas-section {
+  background: var(--surface-2);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
   display: flex;
-  justify-content: space-around;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.upload-area {
+  flex: 1;
+  display: flex;
   align-items: center;
-  background-color: var(--color-block-background2);
-  margin-top: 10px;
-  width: 100%;
-  height: 500px;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-.preview-block .preview-image {
+.upload-area:hover {
+  background: var(--surface-1);
+}
+
+.upload-content {
+  text-align: center;
+}
+
+.upload-icon {
+  font-size: 4rem;
+  color: var(--brand-color);
+  margin-bottom: 1rem;
+}
+
+.hidden-input {
+  display: none;
+}
+
+.error-hint {
+  color: #ff6868;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.preview-viewport {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.canvas-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  position: relative;
+  background-image: radial-gradient(var(--border-subtle) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+canvas {
   max-width: 100%;
+  box-shadow: var(--shadow-lg);
+  background: white;
 }
 
-.preview-block .reset-image {
+.reset-fab {
   position: absolute;
-  top: 0px;
-  right: 8px;
-  font-size: 28px;
+  top: 20px;
+  right: 20px;
+  background: #fb7a99;
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
   cursor: pointer;
-  color: #fb7a99;
+  box-shadow: var(--shadow-md);
 }
 
-.multi-preview-block {
-  display: block;
-  width: 100%;
-  height: 200px;
-  background-color: var(--color-block-background2);
-  margin-top: 10px;
+.thumbnail-strip {
+  height: 140px;
+  background: var(--surface-1);
+  border-top: 1px solid var(--border-subtle);
   padding: 10px;
-  border-radius: 5px;
-  white-space: nowrap;
 }
 
-.multi-preview-block .images {
-  height: calc(100% - 25px);
-  overflow-x: scroll;
-  overflow-y: hidden;
+.strip-header {
+  font-size: 0.8rem;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: var(--text-secondary);
 }
 
-.multi-preview-block img {
-  width: 250px;
-  height: calc(100% - 10px);
-  margin: auto 10px;
-  object-fit: contain;
-  border: 1px #b5b5b5 solid;
+.thumb-list {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+}
+
+.thumb-box {
+  height: 80px;
+  border-radius: 6px;
+  border: 2px solid transparent;
+  overflow: hidden;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
-.multi-preview-block img.selected {
-  border: 4px #a96868 solid;
+.thumb-box.active {
+  border-color: var(--brand-color);
 }
 
-.tools-block {
-  text-align: center;
+.thumb-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.tools-block button {
-  background-color: var(--color-main-theme);
-  color: #fff;
-  padding: 10px 20px;
-  border: 0;
-  margin: 0 5px;
+.quick-tools {
+  padding: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  background: var(--surface-1);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.tool-btn {
+  padding: 8px 16px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
   cursor: pointer;
+  color: var(--text-secondary);
 }
 
-.information-block {
-  width: 35%;
-  margin-left: 15px;
-  font-size: 18px;
+/* --- 右側區 --- */
+.sidebar-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
-.information-block .origin {
-  background-color: var(--color-block-background2);
-  padding: 20px;
-  margin-top: 60px;
+.card {
+  background: var(--surface-1);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
 }
 
-.information-block .draw-tool {
-  background-color: var(--color-block-background2);
-  padding: 20px;
-  margin-top: 20px;
+.card-title {
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 8px;
 }
 
-.draw-tool .title {
-  font-size: 20px;
-  text-align: center;
-  border-bottom: 1px solid;
-  padding-bottom: 10px;
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  margin-bottom: 5px;
+}
+
+.setting-group {
+  margin-bottom: 15px;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: bold;
   margin-bottom: 10px;
 }
 
-.draw-tool .tools {
-  padding-left: 20px;
+.group-content {
+  padding-left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.tools > div {
-  margin-top: 5px;
+.input-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
-.tools .hint svg {
-  color: #bea545;
+.field {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
 }
 
-.tools input[type="number"] {
-  padding: 5px;
-  font-size: 18px;
-  max-width: 30%;
-  letter-spacing: 2px;
-}
-
-.tools input[type="text"] {
-  padding: 5px;
-  font-size: 18px;
-  max-width: 100%;
-  letter-spacing: 2px;
-}
-
-.tools .slider {
-  max-width: 90%;
-}
-
-.draw-tool .download {
-  background-color: #a96868;
-  border: 0;
-  color: #e4e4e4;
-  padding: 10px 20px;
+.field input {
   width: 100%;
-  font-size: 20px;
-  margin-top: 20px;
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-2);
+  color: var(--text-secondary);
+}
+
+.full-input {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-2);
+  color: var(--text-secondary);
+}
+
+.type-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 15px;
+}
+
+.radio-label {
+  flex: 1;
+  min-width: 60px;
+
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  background: var(--surface-2);
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+  font-size: 0.75rem;
   cursor: pointer;
 }
 
-.draw-tool .download[disabled] {
-  background-color: var(--color-background);
-  color: #b1b0b0;
+.radio-label.active {
+  background: var(--brand-color);
+  color: white;
+  border-color: var(--brand-color);
+}
+
+.radio-label input {
+  display: none;
+}
+
+.download-btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background: var(--brand-color);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.download-btn:disabled {
+  background: var(--border-subtle);
   cursor: not-allowed;
 }
 
-.final-block {
-  margin-top: 20px;
-  padding-top: 10px;
-  border-top: 1px solid;
+input[disabled] {
+  opacity: 0.6;
+  pointer-events: none;
 }
 
-.image-type input[type="radio"] {
-  display: none;
-  opacity: 0;
-  height: 0;
-  width: 0;
-}
-
-.image-type .text {
-  display: inline-block;
-  cursor: pointer;
-  background-color: #b5b5b5;
-  margin: 0 5px 10px 5px;
-  padding: 4px 12px;
-}
-
-.image-type input[type="radio"]:checked + .text {
-  background-color: var(--color-main-theme);
-  color: #fff;
-}
-
-.image-type .divider {
-  border-left: 1px solid;
-  margin: 0px 7px;
-  padding: 4px 0;
-}
-
-.final-block .slider {
-  max-width: 100%;
-}
-
-@media (max-width: 768px) {
-  .container {
-    flex-wrap: wrap;
+@media (max-width: 1024px) {
+  .main-layout {
+    grid-template-columns: 1fr;
   }
-
-  .image-block {
-    width: 100%;
-  }
-
-  .upload-file .upload-block {
-    padding: 120px 40px;
-  }
-
-  .information-block {
-    width: 100%;
-    margin: 0;
-    padding-bottom: 20px;
-  }
-
-  .draw-tool .tools {
-    padding-left: 0;
+  .canvas-section {
+    height: 500px;
   }
 }
 </style>

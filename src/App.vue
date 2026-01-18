@@ -1,208 +1,348 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { RouterLink, RouterView, useRoute } from "vue-router";
 
 const route = useRoute();
-const currentTheme = ref(null);
+const isDark = ref(true);
+const isSidebarOpen = ref(false);
 
-onMounted(() => {
-  if (localStorage.getItem("theme") === "light") {
-    setTheme("light");
-  } else {
-    setTheme("dark");
-  }
+const menuItems = [
+  { name: "home", label: "Home", icon: "house" },
+  { name: "json", label: "JSON Parser", icon: "code" },
+  { name: "encode-decode", label: "Encode / Decode", icon: "shield-halved" },
+  { name: "image-editor", label: "Image Editor", icon: "image" },
+];
+
+const currentLabel = computed(() => {
+  const item = menuItems.find((item) => item.name === route.name);
+  return item ? item.label : route.name;
 });
 
+const toggleTheme = () => {
+  isDark.value = !isDark.value;
+  updateTheme();
+};
+
+const updateTheme = () => {
+  const root = document.documentElement;
+  if (isDark.value) {
+    root.classList.add("dark");
+    localStorage.setItem("theme", "dark");
+  } else {
+    root.classList.remove("dark");
+    localStorage.setItem("theme", "light");
+  }
+};
+
 watch(
-  () => route.name,
+  () => route.path,
   () => {
-    toolLink.value.style.display = "";
+    isSidebarOpen.value = false;
   },
 );
 
-const switchTheme = () => {
-  if (localStorage.getItem("theme") === "dark") {
-    setTheme("light");
-  } else {
-    setTheme("dark");
-  }
-};
-
-const setTheme = (theme) => {
-  if (theme == "dark") {
-    document.documentElement.className = "dark";
-    localStorage.setItem("theme", "dark");
-    currentTheme.value = "dark";
-  } else {
-    document.documentElement.className = "";
-    localStorage.setItem("theme", "light");
-    currentTheme.value = "light";
-  }
-};
-
-const toolLink = ref(null);
-const toggleBurger = () => {
-  if (toolLink.value.style.display === "") {
-    toolLink.value.style.display = "inline-block";
-  } else {
-    toolLink.value.style.display = "";
-  }
-};
+onMounted(() => {
+  const theme = localStorage.getItem("theme");
+  isDark.value = theme !== "light";
+  updateTheme();
+});
 </script>
 
 <template>
-  <header>
-    <RouterLink class="brand-title" :to="{ name: 'home' }"> Dev Tools </RouterLink>
-    <nav class="tool-link" ref="toolLink">
-      <RouterLink :to="{ name: 'home' }">Home</RouterLink>
-      <RouterLink :to="{ name: 'json' }">Json Parser</RouterLink>
-      <RouterLink :to="{ name: 'encode-decode' }">Encode & Decode</RouterLink>
-      <RouterLink :to="{ name: 'image-editor' }">Image Editor</RouterLink>
-    </nav>
-    <button class="burger" @click="toggleBurger">≡</button>
-    <div class="header-right">
-      <a href="https://github.com/wangchristine/dev-tools" target="_blank" class="github-icon">
-        <img v-if="currentTheme == 'dark'" src="@/assets/github-mark-white.png" alt="github" class="github-dark" />
-        <img v-else src="@/assets/github.png" alt="github" class="github-light" />
-      </a>
-      <button name="theme" class="theme" @click="switchTheme">
-        <FontAwesomeIcon :icon="['fas', currentTheme == 'dark' ? 'sun' : 'moon']" size="lg" />
-      </button>
-    </div>
-  </header>
+  <div class="app-layout">
+    <Transition name="fade">
+      <div v-if="isSidebarOpen" class="sidebar-overlay" @click="isSidebarOpen = false"></div>
+    </Transition>
 
-  <main>
-    <RouterView />
-  </main>
+    <aside class="sidebar" :class="{ 'is-open': isSidebarOpen }">
+      <div class="sidebar-header">
+        <div class="brand-wrapper">
+          <div class="brand-logo">
+            <font-awesome-icon icon="fa-solid fa-terminal" />
+          </div>
+          <span class="brand-name">Dev Tools</span>
+        </div>
+        <button class="mobile-close" @click="isSidebarOpen = false">
+          <font-awesome-icon icon="fa-solid fa-xmark" />
+        </button>
+      </div>
+
+      <nav class="nav-list">
+        <RouterLink v-for="item in menuItems" :key="item.name" :to="{ name: item.name }" class="nav-link">
+          <div class="icon-box">
+            <font-awesome-icon :icon="['fas', item.icon]" />
+          </div>
+          <span class="label">{{ item.label }}</span>
+        </RouterLink>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button @click="toggleTheme" class="theme-switch">
+          <font-awesome-icon :icon="['fas', isDark ? 'sun' : 'moon']" class="theme-icon" />
+          <span>{{ isDark ? "Light Mode" : "Dark Mode" }}</span>
+        </button>
+      </div>
+    </aside>
+
+    <main class="main-container">
+      <header class="content-header">
+        <div class="header-left">
+          <button class="burger-menu" @click="isSidebarOpen = true">
+            <font-awesome-icon icon="fa-solid fa-bars" />
+          </button>
+          <div class="breadcrumb">
+            <font-awesome-icon icon="fa-solid fa-chevron-right" class="divider-icon" />
+            <span>{{ currentLabel }}</span>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <a href="https://github.com/wangchristine/dev-tools" target="_blank" class="github-link">
+            <img v-if="isDark" src="@/assets/github-mark-white.png" alt="github" />
+            <img v-else src="@/assets/github.png" alt="github" />
+          </a>
+        </div>
+      </header>
+
+      <div class="content-body">
+        <RouterView v-slot="{ Component }">
+          <Transition name="page-fade" mode="out-in">
+            <component :is="Component" />
+          </Transition>
+        </RouterView>
+      </div>
+    </main>
+  </div>
 </template>
 
-<style>
-@import "@/assets/base.css";
-
-header {
-  line-height: 1.5;
-  font-size: 16px;
-  width: 100%;
-  height: 60px;
-  padding: 15px;
-  /* max-height: 100vh; */
-  background-color: var(--color-header-background);
-  border-bottom: solid 1px var(--color-header-bottom);
-  box-shadow: 0px 2px 10px 2px rgb(0 0 0 / 30%);
-}
-
-.brand-title {
-  margin: 0 20px;
-  color: var(--color-main-theme);
-  font-weight: bold;
-  font-size: 18px;
-  text-decoration: none;
-}
-
-nav.tool-link {
-  display: inline-block;
-  /* text-align: center; */
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-header-divider);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-nav a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-}
-
-header .burger {
-  display: none;
-  font-weight: bold;
-  font-size: 18px;
-  border: 0;
-  background-color: transparent;
-  color: var(--color-block-text1);
-  transform: scale(1.5, 1);
-}
-
-@media (hover: hover) {
-  nav a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
-}
-
-header .header-right {
-  float: right;
+<style scoped>
+.app-layout {
   display: flex;
-  height: 28px;
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--surface-2);
 }
 
-.github-icon {
-  margin-right: 16px;
+/* 側邊欄 */
+.sidebar {
+  width: 260px;
+  background-color: var(--surface-1);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.github-icon img {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  padding: 1px;
+.sidebar-header {
+  padding: 32px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.theme {
-  height: 28px;
-  width: 28px;
-  border-radius: 50%;
-  padding: 0;
-  border: solid 1px var(--color-text);
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.theme svg {
+.brand-logo {
+  width: 32px;
+  height: 32px;
+  background: var(--brand-color);
+  color: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.brand-name {
+  font-weight: 800;
+  font-size: 1.2rem;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+}
+
+.nav-list {
+  flex: 1;
+  padding: 0 16px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  margin-bottom: 6px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.icon-box {
+  width: 20px;
+  display: flex;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.nav-link:hover,
+.router-link-active {
+  background-color: var(--brand-color-soft);
+  color: var(--brand-color);
+}
+
+.sidebar-footer {
+  padding: 24px 16px;
+}
+
+.theme-switch {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-2);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.theme-icon {
   color: #ffc225;
 }
 
-main {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 1rem;
-  font-size: 16px;
-  height: calc(100vh - 60px);
+/* 主內容區 */
+.main-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
-@media (max-width: 830px) {
-  .github-icon {
-    display: inline;
-  }
+.content-header {
+  height: 72px;
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--surface-1);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.burger-menu {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  text-transform: capitalize;
+}
+
+.divider-icon {
+  font-size: 0.7rem;
+  opacity: 0.5;
+}
+
+.github-link img {
+  width: 28px;
+  height: 28px;
+}
+
+.mobile-close {
+  display: none;
+}
+
+.content-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px;
+}
+
+/* 動畫 */
+.page-fade-enter-active,
+.page-fade-leave-active {
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+.page-fade-enter-from,
+.page-fade-leave-to {
+  opacity: 0;
+  transform: translateY(5px);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* 手機版 */
 @media (max-width: 768px) {
-  nav.tool-link {
-    display: none;
-    position: absolute;
-    top: 62px;
+  .sidebar {
+    position: fixed;
+    top: 0;
     left: 0;
-    background-color: var(--color-header-background);
-    width: 100%;
-    padding: 20px;
-    z-index: 999;
-    box-shadow: 0px 2px 10px 2px rgb(0 0 0 / 30%);
+    height: 100%;
+    transform: translateX(-100%);
   }
 
-  header .burger {
-    display: inline-block;
+  .sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+  }
+
+  .burger-menu {
+    display: block;
+  }
+
+  .mobile-close {
+    display: block;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+  }
+
+  .content-header {
+    padding: 0 20px;
   }
 }
 </style>

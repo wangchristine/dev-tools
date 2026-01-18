@@ -1,5 +1,5 @@
 <script setup>
-const props = defineProps({
+defineProps({
   value: {
     type: [Number],
     required: true,
@@ -28,75 +28,81 @@ const props = defineProps({
 const emit = defineEmits(["slideRange"]);
 
 const slideRangeInputEvent = (e) => {
-  if (!props.disable) {
-    emit("slideRange", parseInt(e.target.value));
-  }
+  emit("slideRange", parseInt(e.target.value));
 };
 </script>
 
 <template>
-  <div class="slider">
-    <div class="range">
-      <span class="min">{{ props.min }}</span>
-      <span class="max">{{ props.max }}</span>
+  <div class="range-slider" :class="{ disabled: disable }">
+    <div class="slider-track">
       <input
         type="range"
-        :min="props.min"
-        :max="props.max"
-        :value="props.value"
-        :step="props.step"
-        :disabled="props.disable"
+        :min="min"
+        :max="max"
+        :value="value"
+        :step="step"
+        :disabled="disable"
         @input="slideRangeInputEvent"
       />
     </div>
-    <span class="valueText">{{ props.value }}</span>
+    <div class="range-labels">
+      <span class="limit">{{ min }}</span>
+      <span class="current-value">{{ value }}</span>
+      <span class="limit">{{ max }}</span>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.slider {
-  display: inline-block;
+.range-slider {
   width: 100%;
+  padding: 10px 0;
 }
 
-.range {
-  display: inline-block;
-  width: 80%;
-  font-size: 16px;
-}
-
-.range > .max {
-  position: absolute;
-  right: 0;
+.slider-track {
+  position: relative;
+  width: 100%;
+  height: 6px;
 }
 
 input[type="range"] {
   appearance: none;
-  background: #b5b5b5;
   width: 100%;
-  height: 12px;
-  border-radius: 5px;
+  height: 6px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  outline: none;
 }
 
 input[type="range"]::-webkit-slider-thumb {
   appearance: none;
-  background: var(--color-main-theme);
+  width: 18px;
+  height: 18px;
+  background: var(--brand-color);
+  border: 3px solid #fff;
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-input[type="range"]::-moz-range-thumb {
-  appearance: none;
-  background: var(--color-main-theme);
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
 }
 
-.valueText {
-  position: absolute;
-  right: 0;
-  top: 40%;
+.current-value {
+  color: var(--brand-color);
+  font-weight: 700;
+  background: var(--brand-color-soft);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.disabled {
+  opacity: 0.6;
+  pointer-events: none;
 }
 </style>

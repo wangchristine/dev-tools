@@ -4,13 +4,11 @@ import { ref, onUnmounted } from "vue";
 const props = defineProps({
   content: {
     type: [String, Number, Boolean, Array, Object],
-    required: false,
     default: null,
   },
   type: {
     // content type: json, string
     type: [String],
-    required: false,
     default: "string",
   },
 });
@@ -20,27 +18,21 @@ let timer = null;
 
 const copyToClipboard = () => {
   clearTimeout(timer);
-  let clipboardText = ref("");
-  if (props.content !== undefined) {
+  let clipboardText = "";
+  if (props.content !== null) {
     if (props.type === "string") {
-      clipboardText.value = props.content;
+      clipboardText = props.content;
     } else {
-      clipboardText.value = JSON.stringify(props.content, null, 2).replace(/\\"/g, '"').replaceAll(/\\\\/g, "\\");
+      clipboardText = JSON.stringify(props.content, null, 2).replace(/\\"/g, '"').replaceAll(/\\\\/g, "\\");
     }
   }
 
-  navigator.clipboard
-    .writeText(clipboardText.value)
-    .then(() => {
-      isCopied.value = true;
-      console.log("Copied to clipboard.");
-      timer = setTimeout(() => {
-        isCopied.value = false;
-      }, 1000);
-    })
-    .catch((err) => {
-      console.log("Can't copy!", err);
-    });
+  navigator.clipboard.writeText(clipboardText).then(() => {
+    isCopied.value = true;
+    timer = setTimeout(() => {
+      isCopied.value = false;
+    }, 1000);
+  });
 };
 
 onUnmounted(() => {
@@ -49,51 +41,68 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="result-div">
-    <div class="result-content">
+  <div class="copied-block-wrapper">
+    <div class="action-bar">
+      <span class="format-tag">{{ type.toUpperCase() }}</span>
+      <button class="copy-btn" :class="{ 'is-success': isCopied }" @click="copyToClipboard()">
+        <font-awesome-icon :icon="['fas', isCopied ? 'check' : 'copy']" />
+        <span>{{ isCopied ? "Copied!" : "Copy" }}</span>
+      </button>
+    </div>
+
+    <div class="scroll-area">
       <slot></slot>
     </div>
-    <button class="copy" ref="copy" @click="copyToClipboard()">
-      {{ isCopied ? "Copied!" : "Copy" }}
-      <FontAwesomeIcon v-if="isCopied" :icon="['fas', 'check']" />
-      <FontAwesomeIcon v-else :icon="['fas', 'file']" />
-    </button>
   </div>
 </template>
 
 <style scoped>
-.result-div {
-  color: var(--color-block-text3);
-  border: var(--color-block-text1) 1px solid;
-  height: calc(100% - 40px);
-  background-color: var(--color-block-background1);
-  min-height: 100px;
-}
-
-.result-content {
-  position: absolute;
-  padding: 10px 10px 10px 20px;
-  width: 100%;
+.copied-block-wrapper {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--surface-1);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
   height: 100%;
-  overflow-y: auto;
 }
 
-.copy {
-  position: absolute;
-  top: 12px;
-  right: 20px;
-  background-color: var(--color-main-theme);
-  color: white;
-  border: 0;
-  border-radius: 5px;
+.action-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 8px 12px;
-  font-size: 14px;
-  cursor: pointer;
-  z-index: 2;
-  opacity: 0.5;
+  background-color: var(--surface-2);
+  border-bottom: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
 }
 
-.result-div:hover > .copy {
-  opacity: 0.9;
+.format-tag {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+  background: var(--border-subtle);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.copy-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  color: var(--brand-color);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.scroll-area {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  font-size: 0.95rem;
+  line-height: 1.6;
 }
 </style>

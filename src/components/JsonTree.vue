@@ -127,11 +127,11 @@ ul {
 }
 
 .string {
-  color: #29ab29;
+  color: #ce9178;
 }
 
 .number {
-  color: #f04242;
+  color: #569cd6;
 }
 
 .boolean {
@@ -151,13 +151,13 @@ ul {
 
 .array-bracket ~ ul,
 .object-bracket ~ ul {
-  border-left: var(--color-block-ul-border) 1.5px solid;
+  border-left: var(--border-subtle) 1.5px solid;
 }
 
 .array-bracket:hover ~ ul,
 .object-key:hover ~ ul,
 .object-bracket:hover ~ ul {
-  border-left: #b586b5 1.5px solid;
+  border-left: var(--brand-color) 1.5px solid;
 }
 
 .close::after {
@@ -167,10 +167,10 @@ ul {
 
 .count::after {
   content: v-bind(content);
-  background-color: #c3b5f4;
-  color: var(--color-block-text2);
+  background-color: var(--brand-color-soft);
+  color: var(--brand-color);
   border-radius: 4px;
-  padding: 0 4px;
+  padding: 0 6px;
   margin: auto 5px;
   font-size: 95%;
 }

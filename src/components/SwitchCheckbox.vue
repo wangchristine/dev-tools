@@ -41,7 +41,8 @@ input[type="checkbox"] {
   cursor: pointer;
   width: 40px;
   height: 20px;
-  background: #b5b5b5;
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
   border-radius: 20px;
   position: relative;
   display: inline-block;
@@ -61,7 +62,7 @@ input[type="checkbox"] {
 }
 
 input:checked + .switchToggle {
-  background-color: var(--color-main-theme);
+  background-color: var(--brand-color);
 }
 
 .switchToggle:active:after {

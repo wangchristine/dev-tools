@@ -54,10 +54,7 @@ const switchInQuotes = (isChecked) => {
   isQuotationChecked.value = isChecked;
   if (isChecked && jsonString.value === "") {
     jsonString.value = '""';
-  } else if (!isChecked && jsonString.value === '""') {
-    jsonString.value = "";
   } else {
-    setIsAllOpen(true);
     renderResult(jsonString.value);
   }
 };
@@ -81,25 +78,16 @@ watch(jsonString, (userInput) => {
 const renderResult = (userInput) => {
   try {
     if (isQuotationChecked.value) {
-      if (userInput.length >= 2 && userInput.slice(0, 1) === '"' && userInput.slice(userInput.length - 1) === '"') {
-        if (userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"') !== "") {
-          if (isUnicodeChecked.value) {
-            jsonObj.value = JSON.parse(
-              userInput
-                .slice(1, userInput.length - 1)
-                .replaceAll('\\"', '"')
-                .replaceAll(/\\\\u/g, "\\u"),
-            );
-          } else {
-            jsonObj.value = JSON.parse(userInput.slice(1, userInput.length - 1).replaceAll('\\"', '"'));
-          }
-        } else {
-          jsonObj.value = undefined;
-        }
+      if (userInput.length >= 2 && userInput.startsWith('"') && userInput.endsWith('"')) {
+        const content = userInput.slice(1, -1).replaceAll('\\"', '"');
+
+        jsonObj.value = content
+          ? JSON.parse(isUnicodeChecked.value ? content.replaceAll(/\\\\u/g, "\\u") : content)
+          : undefined;
         errorMessage.value = "";
       } else {
         jsonObj.value = undefined;
-        errorMessage.value = 'Input data must wrap by quotation marks("").';
+        errorMessage.value = 'Input must be wrapped by quotation marks("").';
       }
     } else {
       if (userInput === "") {
@@ -123,18 +111,12 @@ let isDragging = ref(false);
 let lastMouseX = ref(0); // 按下當下 x 位置
 
 // DOM
-const container = ref(null);
 const userBlock = ref(null);
 const resultBlock = ref(null);
-
-let containerWidth = ref(0);
 let userBlockWidth = ref(0);
 let resultBlockWidth = ref(0);
 
 const handleMouseDown = (e) => {
-  console.log("down");
-  e.preventDefault();
-
   isDragging.value = true;
   lastMouseX.value = e.clientX;
 
@@ -143,264 +125,321 @@ const handleMouseDown = (e) => {
 };
 
 onMounted(() => {
-  containerWidth.value = container.value.clientWidth;
   window.addEventListener("mousemove", handleMousemove);
   window.addEventListener("mouseup", handleMouseup);
-  window.addEventListener("resize", handleResize);
 });
+
 onUnmounted(() => {
   window.removeEventListener("mousemove", handleMousemove);
   window.removeEventListener("mouseup", handleMouseup);
-  window.removeEventListener("resize", handleResize);
 });
 
 const handleMousemove = (e) => {
-  if (isDragging.value) {
-    userBlock.value.style.width = userBlockWidth.value + (e.clientX - lastMouseX.value) + "px";
-    resultBlock.value.style.width = resultBlockWidth.value - (e.clientX - lastMouseX.value) + "px";
-  }
+  if (!isDragging.value) return;
+  const delta = e.clientX - lastMouseX.value;
+  userBlock.value.style.width = `${userBlockWidth.value + delta}px`;
+  resultBlock.value.style.width = `${resultBlockWidth.value - delta}px`;
 };
 
 const handleMouseup = () => {
   isDragging.value = false;
 };
-
-const handleResize = () => {
-  if (window.innerWidth >= 768) {
-    let resizeDiff = container.value.clientWidth - containerWidth.value;
-    userBlock.value.style.width = userBlock.value.clientWidth + Math.floor(resizeDiff / 2) + "px";
-    resultBlock.value.style.width = container.value.clientWidth - userBlock.value.clientWidth - 12 + "px";
-    containerWidth.value = container.value.clientWidth;
-  } else {
-    userBlock.value.style.width = "100%";
-    resultBlock.value.style.width = "100%";
-  }
-};
 </script>
 
 <template>
-  <div class="container" ref="container">
-    <div class="user-block" id="user-block" ref="userBlock">
-      <div class="title-block">
-        <div class="title">Input</div>
-        <div class="action">
-          <select name="example" class="example" @change="selectExample($event)">
-            <option value="0" selected>-Examples-</option>
-            <option value="1">Data types</option>
-            <option value="2">GCP log</option>
-            <option value="3">Multi-level</option>
-            <option value="4">Json string</option>
-            <option value="5">Unicode</option>
-          </select>
-          <div class="radio-block">
-            <div class="title">In quotes("")?</div>
-            <!-- Wrap by quotation("")? -->
-            <SwitchCheckbox :is-checked="isQuotationChecked" @switch-checked="switchInQuotes" />
+  <div class="tool-container">
+    <section class="control-panel">
+      <div class="control-flex-wrapper">
+        <div class="control-main-area">
+          <div class="control-row-group">
+            <div class="control-item">
+              <label class="group-label">Quick Examples</label>
+              <select class="custom-select" @change="selectExample($event)">
+                <option value="0">- Select Example -</option>
+                <option value="1">All Data Types</option>
+                <option value="2">GCP JSON Log</option>
+                <option value="3">Multi-level Nesting</option>
+                <option value="4">JSON String</option>
+                <option value="5">Unicode String</option>
+              </select>
+            </div>
+            <div class="control-item">
+              <label class="group-label">Tree Controls</label>
+              <div class="btn-group">
+                <button class="icon-btn" @click="setIsAllOpen(true)" :disabled="isAllOpen === true" title="Expand All">
+                  <font-awesome-icon :icon="['fas', 'expand']" /> Expand
+                </button>
+                <button
+                  class="icon-btn"
+                  @click="setIsAllOpen(false)"
+                  :disabled="isAllOpen === false"
+                  title="Collapse All"
+                >
+                  <font-awesome-icon :icon="['fas', 'compress']" /> Collapse
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      <textarea
-        v-focus
-        name="userInput"
-        class="user-json"
-        placeholder="Type here to convert to json tree..."
-        v-model.trim="jsonString"
-      ></textarea>
-    </div>
-    <div class="drag-block" id="drag-block" @mousedown="handleMouseDown">
-      <FontAwesomeIcon :icon="['fa', 'grip-vertical']" size="sm" />
-    </div>
 
-    <div class="result-block" id="result-block" ref="resultBlock">
-      <div class="title-block">
-        <div class="title">Result</div>
-        <div class="action">
-          <button
-            class="all-open-control"
-            data-text="Expand All"
-            @click="setIsAllOpen(true)"
-            :disabled="isAllOpen === true"
-          >
-            <FontAwesomeIcon :icon="['fas', 'plus']" size="sm" />
-          </button>
-          <button
-            class="all-open-control"
-            data-text="Collapse All"
-            @click="setIsAllOpen(false)"
-            :disabled="isAllOpen === false"
-          >
-            <FontAwesomeIcon :icon="['fas', 'minus']" size="sm" />
-          </button>
-          <div class="radio-block">
-            <div class="title">Parse Unicode?</div>
-            <SwitchCheckbox :is-checked="isUnicodeChecked" @switch-checked="switchUnicode" />
+        <div class="control-side-area">
+          <div class="settings-grid">
+            <div class="setting-row">
+              <span class="setting-label">In Quotes ("")?</span>
+              <SwitchCheckbox :is-checked="isQuotationChecked" @switch-checked="switchInQuotes" />
+            </div>
+            <div class="setting-row">
+              <span class="setting-label">Parse Unicode?</span>
+              <SwitchCheckbox :is-checked="isUnicodeChecked" @switch-checked="switchUnicode" />
+            </div>
           </div>
         </div>
       </div>
-      <CopiedBlock
-        :content="jsonObj !== undefined ? jsonObj : errorMessage"
-        :type="jsonObj !== undefined ? 'json' : 'string'"
-      >
-        <JsonTree
-          v-if="jsonObj !== undefined"
-          :json="jsonObj"
-          :trans-unicode="isUnicodeChecked"
-          :is-all-open="isAllOpen"
-          @manual-open="setIsAllOpen(null)"
-        />
-        <p v-else class="error-message">{{ errorMessage }}</p>
-      </CopiedBlock>
+    </section>
+
+    <div class="workspace">
+      <div class="editor-pane" ref="userBlock">
+        <div class="pane-header">
+          <span class="pane-title">JSON INPUT</span>
+          <button class="clear-btn" @click="jsonString = ''" v-if="jsonString">Clear</button>
+        </div>
+        <textarea v-model.trim="jsonString" v-focus placeholder="Type JSON here..." class="custom-textarea"></textarea>
+      </div>
+
+      <div class="drag-handle" @mousedown="handleMouseDown">
+        <font-awesome-icon :icon="['fas', 'grip-vertical']" />
+      </div>
+
+      <div class="editor-pane" ref="resultBlock">
+        <div class="pane-header">
+          <span class="pane-title">TREE VIEW</span>
+        </div>
+        <div class="result-wrapper">
+          <CopiedBlock
+            :content="jsonObj !== undefined ? jsonObj : errorMessage"
+            :type="jsonObj !== undefined ? 'json' : 'string'"
+          >
+            <JsonTree
+              v-if="jsonObj !== undefined"
+              :json="jsonObj"
+              :trans-unicode="isUnicodeChecked"
+              :is-all-open="isAllOpen"
+              @manual-open="setIsAllOpen(null)"
+            />
+            <p v-else class="error-text">
+              <font-awesome-icon v-if="errorMessage" :icon="['fas', 'circle-exclamation']" />{{ errorMessage }}
+            </p>
+          </CopiedBlock>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.container {
+.tool-container {
   display: flex;
-  justify-content: space-around;
+  flex-direction: column;
+  gap: 20px;
   height: 100%;
 }
 
-.user-block {
-  width: 45%;
-  min-width: 270px;
+.control-panel {
+  background: var(--surface-1);
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  flex-shrink: 0;
 }
 
-.drag-block {
+.control-flex-wrapper {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+/* Setting Left */
+.control-main-area {
+  flex: 2;
+}
+
+.control-row-group {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.group-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.custom-select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  width: 100%;
+}
+
+.btn-group {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn {
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: 0.2s;
+}
+
+.icon-btn:hover:not(:disabled) {
+  border-color: var(--brand-color);
+  color: var(--brand-color);
+}
+
+.icon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Setting Right */
+.control-side-area {
+  flex: 1;
+  min-width: 200px;
+}
+
+.settings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--surface-2);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+}
+
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.setting-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* Content */
+.workspace {
+  display: flex;
+  flex: 1;
+  min-height: 500px;
+  gap: 0;
+  overflow: hidden;
+}
+
+.editor-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
+}
+
+.editor-pane:first-child {
+  width: 45%;
+}
+.editor-pane:last-child {
+  flex: 1;
+}
+
+.pane-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pane-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.clear-btn {
+  background: transparent;
+  border: none;
+  color: var(--brand-color);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.custom-textarea {
+  flex: 1;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  color: var(--text-primary);
+  resize: none;
+  outline: none;
+}
+
+.custom-textarea:focus {
+  border-color: var(--brand-color);
+}
+
+.drag-handle {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  width: 12px;
-  z-index: 3;
   cursor: col-resize;
+  width: 12px;
+  background: var(--surface-2);
+  color: var(--text-secondary);
 }
 
-.result-block {
-  width: calc(55% - 12px);
-  min-width: 270px;
+.drag-handle:hover {
+  color: var(--brand-color);
 }
 
-.title-block {
+.result-wrapper {
+  flex: 1;
+  min-height: 0;
+}
+
+.error-text {
+  color: #ef4444;
+  line-height: 1.6;
+  font-weight: 600;
   display: flex;
   align-items: center;
-  font-size: 20px;
-  height: 40px;
-  width: 100%;
-  border: var(--color-block-text1) 1px solid;
-  background-color: var(--color-block-background2);
-}
-
-.title-block > .title {
-  padding: 0 10px;
-  border-right: solid 1px;
-}
-
-.title-block .action {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0 5px;
-  width: 100%;
-  height: 100%;
-}
-
-.title-block .action .example {
-  padding: 2px 0;
-  border-radius: 3px;
-  max-width: 95px;
-}
-
-.title-block .action .radio-block {
-  font-size: 16px;
-  line-height: 1;
-  text-align: center;
-}
-
-.title-block .action .radio-block > .title {
-  font-size: 14px;
-}
-
-.all-open-control {
-  position: relative;
-  padding: 2px 5px;
-  font-size: 14px;
-  font-weight: bold;
-  margin-left: 2px;
-}
-
-.all-open-control::before {
-  position: absolute;
-  top: -32px;
-  left: 0;
-  z-index: 1;
-  width: 100px;
-  background-color: var(--color-block-background1);
-  border: 1px solid #888;
-  border-radius: 2px;
-  color: var(--color-text);
-  content: attr(data-text);
-  padding: 6px 10px;
-  border-radius: 5px;
-  display: none;
-}
-
-.all-open-control:hover::before {
-  display: block;
-}
-
-.user-json {
-  padding: 10px;
-  border: var(--color-block-text1) 1px solid;
-  width: 100%;
-  height: calc(100% - 40px);
-  min-height: 100px;
-  overflow-y: auto;
-  resize: none;
-  font-size: 16px;
-  background-color: var(--color-block-background1);
-  color: var(--color-block-text1);
-}
-
-.tree-json {
-  position: absolute;
-  padding: 10px 10px 10px 20px;
-  width: 100%;
-  height: 100%;
-  overflow-y: scroll;
-}
-
-.error-message {
-  color: #d02451;
-  font-weight: bold;
+  gap: 8px;
 }
 
 @media (max-width: 768px) {
-  .container {
-    justify-content: flex-start;
+  .workspace {
     flex-direction: column;
+    gap: 12px;
   }
-
-  .user-block {
-    width: 100%;
-  }
-
-  .user-json {
-    height: 400px;
-  }
-
-  .drag-block {
+  .drag-handle {
     display: none;
   }
-
-  .result-block {
-    width: 100%;
-    margin-top: 20px;
-    padding-bottom: 30px;
-  }
-
-  .result-div {
+  .editor-pane {
+    width: 100% !important;
     height: 400px;
+  }
+  .control-flex-wrapper {
+    flex-direction: column;
   }
 }
 </style>

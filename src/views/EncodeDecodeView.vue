@@ -10,50 +10,58 @@ const resultString = ref("");
 let errorMessage = ref("");
 let typeDescription = ref("");
 
+const types = [
+  {
+    type: "base64",
+    label: "Base64",
+    description: "Handles both ASCII and Unicode (UTF-8).",
+  },
+  {
+    type: "url",
+    label: "URL",
+    description: "Encodes characters for URI safety. Convert all characters except: A-Z a-z 0-9 - _ . ! ~ * ' ()",
+  },
+];
+
 watch(
   [selectedType, selectedMethod],
   ([type]) => {
-    userString.value = "";
-    switch (type) {
-      case "base64":
-        typeDescription.value = "This base64 tool can be deal with ASCII and Unicode.";
-        break;
-      case "url":
-        typeDescription.value = "This url tool will convert all characters except: A-Z a-z 0-9 - _ . ! ~ * ' ()";
-        break;
-    }
+    const target = types.find((t) => t.type === type);
+    typeDescription.value = target ? target.description : "";
   },
   { immediate: true },
 );
 
-watch(userString, (userInput) => {
+watch([userString, selectedType, selectedMethod], ([userInput]) => {
+  if (!userString.value) {
+    resultString.value = "";
+    errorMessage.value = "";
+    return;
+  }
   try {
-    switch (selectedType.value) {
-      case "base64":
-        if (selectedMethod.value === "encode") {
-          resultString.value = btoa(
-            encodeURIComponent(userInput).replace(/%([0-9A-F]{2})/g, function toSolidBytes(match, p1) {
-              return String.fromCharCode("0x" + p1);
-            }),
-          );
-        } else {
-          resultString.value = decodeURIComponent(
-            atob(userInput)
-              .split("")
-              .map(function (c) {
-                return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-              })
-              .join(""),
-          );
-        }
-        break;
-      case "url":
-        if (selectedMethod.value === "encode") {
-          resultString.value = encodeURIComponent(userInput);
-        } else {
-          resultString.value = decodeURIComponent(userInput);
-        }
-        break;
+    if (selectedType.value === "base64") {
+      if (selectedMethod.value === "encode") {
+        resultString.value = btoa(
+          encodeURIComponent(userInput).replace(/%([0-9A-F]{2})/g, function toSolidBytes(match, p1) {
+            return String.fromCharCode("0x" + p1);
+          }),
+        );
+      } else {
+        resultString.value = decodeURIComponent(
+          atob(userInput)
+            .split("")
+            .map(function (c) {
+              return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+            })
+            .join(""),
+        );
+      }
+    } else if (selectedType.value === "url") {
+      if (selectedMethod.value === "encode") {
+        resultString.value = encodeURIComponent(userInput);
+      } else {
+        resultString.value = decodeURIComponent(userInput);
+      }
     }
     errorMessage.value = "";
   } catch (e) {
@@ -63,163 +71,288 @@ watch(userString, (userInput) => {
 </script>
 
 <template>
-  <div class="container">
-    <div class="select-block">
-      <p>Please select one item of each block.</p>
-      <div class="list-block">
-        <p>1. Type</p>
-        <input type="radio" class="radio" name="type" id="type-base64" value="base64" v-model="selectedType" checked />
-        <label for="type-base64">base64</label>
-        <input type="radio" class="radio" name="type" id="type-url" value="url" v-model="selectedType" />
-        <label for="type-url">url</label>
+  <div class="tool-container">
+    <section class="control-panel">
+      <div class="control-flex-wrapper">
+        <div class="control-main-area">
+          <div class="control-group">
+            <label class="group-label">1. Select Type</label>
+            <div class="segmented-control">
+              <button
+                v-for="t in types"
+                :key="t.type"
+                :class="{ active: selectedType === t.type }"
+                @click="selectedType = t.type"
+              >
+                {{ t.label }}
+              </button>
+            </div>
+          </div>
 
-        <p>2. Encode/Decode</p>
-        <input
-          type="radio"
-          class="radio"
-          name="method"
-          id="method-encode"
-          value="encode"
-          v-model="selectedMethod"
-          checked
-        />
-        <label for="method-encode">encode</label>
-        <input type="radio" class="radio" name="method" id="method-decode" value="decode" v-model="selectedMethod" />
-        <label for="method-decode">decode</label>
+          <div class="control-group">
+            <label class="group-label">2. Select Method</label>
+            <div class="segmented-control">
+              <button :class="{ active: selectedMethod === 'encode' }" @click="selectedMethod = 'encode'">
+                Encode
+              </button>
+              <button :class="{ active: selectedMethod === 'decode' }" @click="selectedMethod = 'decode'">
+                Decode
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="control-side-area">
+          <div class="desc-card">
+            <div class="desc-header">
+              <font-awesome-icon :icon="['fas', 'circle-check']" class="desc-icon" />
+              <span class="desc-title">{{ selectedType.toUpperCase() }} Description</span>
+            </div>
+            <p class="desc-content">{{ typeDescription }}</p>
+          </div>
+        </div>
       </div>
-      <div class="detail-block">
-        <p class="title"><FontAwesomeIcon :icon="['fas', 'screwdriver-wrench']" /> Description</p>
-        <p>{{ typeDescription }}</p>
+    </section>
+
+    <div class="workspace">
+      <div class="editor-pane">
+        <div class="pane-header">
+          <span class="pane-title">INPUT</span>
+          <button class="clear-btn" @click="userString = ''" v-if="userString">Clear</button>
+        </div>
+        <textarea v-model="userString" v-focus placeholder="Type here..." class="custom-textarea"></textarea>
       </div>
-    </div>
-    <div class="right-block">
-      <div class="user-block" id="user-block" ref="userBlock">
-        <p class="block-title">Input</p>
-        <textarea
-          v-focus
-          name="userInput"
-          class="user-string"
-          placeholder="Type here to encode/decode..."
-          v-model.trim="userString"
-        ></textarea>
-      </div>
-      <div class="result-block" id="result-block" ref="resultBlock">
-        <p class="block-title">Result</p>
-        <CopiedBlock :content="errorMessage === '' ? resultString : errorMessage" type="string">
-          <p v-if="errorMessage === ''">{{ resultString }}</p>
-          <p v-else class="error-message">{{ errorMessage }}</p>
-        </CopiedBlock>
+
+      <div class="editor-pane">
+        <div class="pane-header"><span class="pane-title">RESULT</span></div>
+        <div class="result-wrapper">
+          <CopiedBlock :content="errorMessage || resultString">
+            <div v-if="errorMessage" class="error-text">
+              <font-awesome-icon :icon="['fas', 'triangle-exclamation']" />
+              {{ errorMessage }}
+            </div>
+            <div v-else class="output-text">{{ resultString }}</div>
+          </CopiedBlock>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.container {
+.tool-container {
   display: flex;
-  justify-content: space-around;
-  height: 100%;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  min-height: 100%;
+  padding-bottom: 10px;
 }
 
-.select-block {
-  width: 300px;
-  padding: 10px;
+.control-panel {
+  background: var(--surface-1);
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  flex-shrink: 0;
 }
 
-.list-block {
-  color: var(--color-block-text1);
-}
-
-.list-block > p {
-  font-size: 18px;
-  margin-top: 20px;
-}
-
-.list-block > label {
-  font-size: 16px;
-  padding: 5px 10px;
-  margin-right: 10px;
-}
-
-.detail-block {
-  margin-top: 20px;
-  font-size: 16px;
-  border: 2px var(--color-block-text1) dashed;
-  padding: 8px 10px;
-}
-
-.detail-block .title {
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.right-block {
-  flex-grow: 1;
+.control-flex-wrapper {
   display: flex;
-  flex-wrap: wrap;
+  gap: 32px;
+  align-items: stretch;
 }
 
-.user-block {
-  width: 100%;
-  min-height: 50%;
+/* 按鈕區 */
+.control-main-area {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.result-block {
-  width: 100%;
-  min-height: 50%;
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.block-title {
-  font-size: 20px;
-  text-align: center;
-  border: var(--color-block-text1) 1px solid;
-  background-color: var(--color-block-background2);
+.group-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
 }
 
-.user-string {
+.segmented-control {
+  display: flex;
+  background: var(--surface-2);
+  padding: 4px;
+  border-radius: 10px;
+}
+
+.segmented-control button {
+  flex: 1;
   padding: 10px;
-  border: var(--color-block-text1) 1px solid;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.segmented-control button.active {
+  background: var(--surface-1);
+  color: var(--brand-color);
+  box-shadow: var(--shadow-sm);
+}
+
+/* 描述區 */
+.control-side-area {
+  flex: 1;
+  display: flex;
+}
+
+.desc-card {
   width: 100%;
-  height: calc(100% - 52px);
-  min-height: 100px;
-  overflow-y: scroll;
+  background: var(--brand-color-soft);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  border: 1px solid rgba(96, 182, 153, 0.15);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.desc-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: var(--brand-color);
+}
+
+.desc-icon {
+  color: var(--brand-color);
+}
+
+.desc-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.desc-content {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* workspace */
+.workspace {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  min-height: 500px;
+}
+
+.editor-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pane-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pane-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.clear-btn {
+  background: transparent;
+  border: none;
+  color: var(--brand-color);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.custom-textarea {
+  flex: 1;
+  min-height: 250px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
   resize: none;
-  font-size: 16px;
-  background-color: var(--color-block-background1);
-  color: var(--color-block-text1);
+  outline: none;
 }
 
-.result-string {
-  position: absolute;
-  padding: 10px 10px 10px 20px;
-  width: 100%;
-  height: 100%;
-  overflow-y: scroll;
+.custom-textarea:focus {
+  border-color: var(--brand-color);
 }
 
-.error-message {
-  color: #d02451;
-  font-weight: bold;
+.result-wrapper {
+  flex: 1;
+  min-height: 0;
+}
+
+.error-text {
+  color: #ef4444;
+  line-height: 1.6;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.output-text {
+  word-break: break-all;
+  white-space: pre-wrap; /* 保留空格並換行 */
+}
+
+@media (max-width: 1024px) {
+  .tool-container {
+    overflow-y: auto;
+  }
+  .control-panel {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .control-flex-wrapper {
+    flex-direction: column;
+    gap: 20px;
+  }
+  .workspace {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+  .custom-textarea {
+    min-height: 200px;
+  }
 }
 
 @media (max-width: 768px) {
-  .container {
-    flex-wrap: wrap;
+  .control-panel {
+    padding: 16px;
   }
-
-  .select-block {
-    margin: 0;
-    width: 90%;
+  .control-group {
+    min-width: 100%;
     text-align: center;
   }
-
-  .user-block {
-    height: 300px;
-  }
-
-  .result-block {
-    height: 300px;
-    padding-bottom: 20px;
+  .segmented-control {
+    justify-content: center;
   }
 }
 </style>
